@@ -1,0 +1,1000 @@
+variant: fcos
+version: 1.0.0
+passwd:
+  users:
+    - name: core
+      gecos: CoreOS Admin
+      groups:
+        - sudo
+        - wheel
+        - adm
+        - systemd-journal
+    - name: kni
+      gecos: ocp-ipi-baremtal-lab user
+      groups:
+        - sudo
+        - wheel
+        - adm
+        - systemd-journal
+      password_hash: $y$j9T$rVVNGAWx1YhOFEOQQdk5v1$CXiP2XQROTh/5e4ZB66WaYafvNkfO/ZqVjaXYwx5Fo2
+systemd:
+  units:
+    - name: systemd-resolved.service
+      enabled: false
+      mask: true
+    - name: libvirtd-tcp.socket
+      enabled: true
+    - name: host-configure.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/host/configure.sh
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: master0.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=libvirtd-tcp.socket
+        After=libvirtd-tcp.socket
+        Requires=libvirtd-tcp.socket
+        ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master0.done
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master0 52:54:00:11:22:b1 52:54:00:11:22:a1
+        ExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master0.done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: master1.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=libvirtd-tcp.socket
+        After=libvirtd-tcp.socket
+        Requires=libvirtd-tcp.socket
+        ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master1.done
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master1 52:54:00:11:22:b2 52:54:00:11:22:a2
+        ExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master1.done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: master2.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=libvirtd-tcp.socket
+        After=libvirtd-tcp.socket
+        Requires=libvirtd-tcp.socket
+        ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master2.done
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master2 52:54:00:11:22:b3 52:54:00:11:22:a3
+        ExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master2.done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: worker0.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=libvirtd-tcp.socket
+        After=libvirtd-tcp.socket
+        Requires=libvirtd-tcp.socket
+        ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker0.done
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh worker0 52:54:00:11:22:b4 52:54:00:11:22:a4 2 8192
+        ExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/worker0.done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: worker1.service
+      enabled: true
+      contents: |
+        [Unit]
+        Wants=libvirtd-tcp.socket
+        After=libvirtd-tcp.socket
+        Requires=libvirtd-tcp.socket
+        ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker1.done
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh worker1 52:54:00:11:22:b5 52:54:00:11:22:a5 2 8192
+        ExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/worker1.done
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+    - name: webserver.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Webserver for ocp-ipi-baremetal-lab
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=on-failure
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm -f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+                --cidfile=%t/%n.ctr-id \
+                --cgroups=no-conmon \
+                --rm \
+                --sdnotify=conmon \
+                --replace \
+                --detach \
+                --net host \
+                --name webserver \
+                -v /home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache:/var/www/html quay.io/centos7/httpd-24-centos7:latest
+        ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: vbmc.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-e6d443b2ffab510db1684ca2833592e6f6de26cdb58a625eb0bb739e2e0b3be9.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        TimeoutStopSec=70
+        TimeoutStartSec=600
+        ExecStartPre=/usr/bin/rm -f %t/%n.ctr-id
+        ExecStartPre=/usr/bin/podman build /opt/ocp-ipi-baremetal-lab/vbmc --net host -t localhost/vbmc
+        ExecStart=/usr/bin/podman run \
+                --cidfile=%t/%n.ctr-id \
+                --cgroups=no-conmon \
+                --rm \
+                --sdnotify=conmon \
+                --replace \
+                -d \
+                -ti \
+                --name vbmc \
+                --net host \
+                localhost/vbmc
+        ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: dhcp.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Dnsmasq for ocp-ipi-baremetal-lab
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        TimeoutStartSec=180
+        TimeoutStopSec=70
+        ExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id
+        ExecStartPre=/usr/bin/podman build --net host --tag localhost/dnsmasq /opt/ocp-ipi-baremetal-lab/dhcp
+        ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dnsmasq
+        ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: broadcast.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Check containers status
+        After=selinux-configure.service
+
+        [Service]
+        Timeout=0
+        Type=oneshot
+        ExecStart=/opt/ocp-ipi-baremetal-lab/host/broadcast.sh
+        RemainAfterExit=yes
+
+        [Install]
+        WantedBy=basic.target
+storage:
+  directories:
+    - path: /home/kni/ocp-ipi-baremetal-lab
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+    - path: /home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+  files:
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/Dockerfile
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          FROM fedora
+          MAINTAINER "Vinu K" <vkochuku@redhat.com>
+          ADD run.sh /run.sh
+          ADD .vbmc /home/vbmc/.vbmc
+          RUN yum install -y procps python3-pip libvirt-devel python3-devel gcc && \
+              yum clean all && \
+              rm -rf /var/cache/yum && \
+              useradd -u 1001 -m -d /home/vbmc -s /bin/bash vbmc && \
+              chown vbmc:vbmc -R /home/vbmc
+          USER vbmc
+          RUN pip3 install --user virtualbmc
+          ENTRYPOINT ["bash", "-c", "/run.sh"]
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/run.sh
+      mode: 0755
+      overwrite: true
+      contents:
+        inline: |
+          set -x
+          rm -fv /home/vbmc/.vbmc/master.pid
+          /home/vbmc/.local/bin/vbmcd --foreground
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master0/config
+      mode: 0644
+      user:
+        id: 1001
+      group:
+        id: 1001
+      overwrite: true
+      contents:
+        inline: |
+          [VirtualBMC]
+          username = admin
+          password = password
+          address = 192.168.123.1
+          port = 6230
+          domain_name = master0
+          libvirt_uri = qemu+tcp://localhost/system
+          active = True
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master1/config
+      mode: 0644
+      user:
+        id: 1001
+      group:
+        id: 1001
+      overwrite: true
+      contents:
+        inline: |
+          [VirtualBMC]
+          username = admin
+          password = password
+          address = 192.168.123.1
+          port = 6231
+          domain_name = master1
+          libvirt_uri = qemu+tcp://localhost/system
+          active = True
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master2/config
+      mode: 0644
+      user:
+        id: 1001
+      group:
+        id: 1001
+      overwrite: true
+      contents:
+        inline: |
+          [VirtualBMC]
+          username = admin
+          password = password
+          address = 192.168.123.1
+          port = 6232
+          domain_name = master2
+          libvirt_uri = qemu+tcp://localhost/system
+          active = True
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker0/config
+      mode: 0644
+      user:
+        id: 1001
+      group:
+        id: 1001
+      overwrite: true
+      contents:
+        inline: |
+          [VirtualBMC]
+          username = admin
+          password = password
+          address = 192.168.123.1
+          port = 6233
+          domain_name = worker0
+          libvirt_uri = qemu+tcp://localhost/system
+          active = True
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker1/config
+      mode: 0644
+      user:
+        id: 1001
+      group:
+        id: 1001
+      overwrite: true
+      contents:
+        inline: |
+          [VirtualBMC]
+          username = admin
+          password = password
+          address = 192.168.123.1
+          port = 6234
+          domain_name = worker1
+          libvirt_uri = qemu+tcp://localhost/system
+          active = True
+    - path: /etc/resolv.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: ""
+    - path: /etc/sudoers.d/kni
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          kni ALL=(ALL) NOPASSWD: ALL
+    - path: /etc/libvirt/libvirtd.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          listen_tls = 0
+          listen_tcp = 1
+          tcp_port = "16509"
+          tls_port = "16514"
+          auth_tcp = "none"
+    - path: /etc/libvirt/libvirt.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          uri_default = "qemu+tcp://localhost/system"
+    - path: /etc/sysctl.d/99-sysctl.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          net.ipv4.ip_forward = 1
+    - path: /etc/ssh/sshd_config.d/20-enable-passwords.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          PasswordAuthentication yes
+    - path: /opt/ocp-ipi-baremetal-lab/host/configure.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/sh
+          /usr/sbin/iptables -t nat -I POSTROUTING -s 192.168.123.0/24 ! -d 192.168.123.0/24 -j MASQUERADE
+          /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 443 -j DNAT --to-destination 192.168.123.89:443
+          /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 6443 -j DNAT --to-destination 192.168.123.89:6443
+          systemctl start libvirtd-tcp.socket
+    - path: /etc/NetworkManager/system-connections/ens3.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=ens3
+          type=ethernet
+          autoconnect=yes
+          interface-name=ens3
+          [ipv4]
+          method=auto
+          [ipv6]
+          method=disabled
+    - path: /etc/NetworkManager/system-connections/baremetal-dummy.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=baremetal-dummy
+          type=dummy
+          interface-name=baremetal-dummy
+          autoconnect=yes
+          master=baremetal
+          slave-type=bridge
+          [ipv4]
+          method=link-local
+          [ipv6]
+          method=disabled
+    - path: /etc/NetworkManager/system-connections/baremetal.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=baremetal
+          type=bridge
+          autoconnect=yes
+          interface-name=baremetal
+          [ipv4]
+          method=manual
+          addresses=192.168.123.1
+          [ipv6]
+          method=disabled
+          [bridge]
+          mac-address=52:54:00:11:22:a0
+          interface-name=baremetal
+    - path: /etc/NetworkManager/system-connections/baremetal-slave.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=baremetal-slave
+          type=ethernet
+          interface-name=baremetal-dummy
+          master=baremetal
+          autoconnect=yes
+          slave-type=bridge
+    - path: /etc/NetworkManager/system-connections/provision-dummy.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=provision-dummy
+          type=dummy
+          interface-name=provision-dummy
+          autoconnect=yes
+          master=provisioning
+          slave-type=bridge
+          [ipv4]
+          method=link-local
+          [ipv6]
+          method=disabled
+    - path: /etc/NetworkManager/system-connections/provisioning.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=provisioning
+          type=bridge
+          interface-name=provisioning
+          autoconnect=yes
+          [ipv4]
+          method=manual
+          addresses=172.22.0.254/24
+          [ipv6]
+          method=disabled
+          [bridge]
+          mac-address=52:54:00:11:22:b0
+          interface-name=provisioning
+    - path: /etc/NetworkManager/system-connections/provisioning-slave.nmconnection
+      mode: 0600
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [connection]
+          id=provisioning-slave
+          type=ethernet
+          interface-name=provision-dummy
+          master=provisioning
+          autoconnect=yes
+          slave-type=bridge
+    - path: /etc/NetworkManager/conf.d/ocp-ipi-baremetal-lab.conf
+      mode: 0644
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          [main]
+          plugins=keyfile
+          dns=dnsmasq
+    - path: /etc/NetworkManager/dnsmasq.d/ocp-ipi-baremetal-lab.conf
+      mode: 0644
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          address=/.apps.ocp.example.local/192.168.123.89
+          addn-hosts=/etc/hosts
+    - path: /etc/hosts
+      mode: 0644
+      overwrite: true
+      user:
+        name: root
+      contents:
+        inline: |
+          127.0.0.1 localhost localhost.localdomain ocp-ipi-baremetal-lab.ocp.example.local
+          192.168.123.88 api.ocp.example.local
+          192.168.123.90 bootstrap.ocp.example.local
+          192.168.123.91 master0.ocp.example.local
+          192.168.123.92 master1.ocp.example.local
+          192.168.123.93 master2.ocp.example.local
+          192.168.123.94 worker0.ocp.example.local
+          192.168.123.95 worker1.ocp.example.local
+          192.168.123.1 ocp-ipi-baremetal-lab.ocp.example.local lb.ocp.example.local mirror.ocp.example.local proxy.ocp.example.local
+    - path: /etc/zincati/config.d/90-disable-auto-updates.toml
+      contents:
+        inline: |
+          [updates]
+          enabled = false
+    - path: /opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          #!/bin/bash
+          # Create node for ocp-ipi-baremetal-lab
+          
+          set -euxo pipefail
+          
+          VM_NAME=$1
+          MAC1=$2
+          MAC2=$3
+          VM_DIR=/opt/ocp-ipi-baremetal-lab/libvirt
+          VM_DISK=$VM_DIR/$VM_NAME/$VM_NAME.img
+          VCPU=${4:-4}
+          MEMORY=${5:-16384}
+          NETWORK1=bridge=provisioning,mac=$MAC1
+          NETWORK2=bridge=baremetal,mac=$MAC2
+          
+          if virsh list | grep $VM_NAME 2>&1>/dev/null; then virsh destroy $VM_NAME 2>/dev/null; virsh undefine $VM_NAME 2>/dev/null; fi
+          if virsh list --all | grep $VM_NAME 2>&1>/dev/null; then virsh undefine $VM_NAME 2>/dev/null; fi
+          if [ ! -f $VM_DISK ] ; then mkdir -p $VM_DIR/$VM_NAME; qemu-img create $VM_DISK 60G; fi
+          
+          virsh define <(virt-install --name $VM_NAME \
+                  --os-variant fedora-coreos-stable \
+                  --vcpus $VCPU \
+                  --memory $MEMORY \
+                  --disk $VM_DISK \
+                  --network $NETWORK1 \
+                  --network $NETWORK2 \
+                  --pxe \
+                  --boot network,hd \
+                  --graphics spice,listen=0.0.0.0 \
+                  --video virtio \
+                  --channel spicevmc \
+                  --console pty,target.type=virtio \
+                  --serial pty \
+                  --noautoconsole \
+                  --print-xml 2)
+          touch /opt/ocp-ipi-baremetal-lab/$VM_NAME.done
+    - path: /opt/ocp-ipi-baremetal-lab/dhcp/Containerfile
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          FROM fedora
+          MAINTAINER "Vinu K" <vkochuku@redhat.com>
+          RUN yum install -y dnsmasq
+          ADD dnsmasq.conf /dnsmasq.conf
+          ENTRYPOINT ["dnsmasq"]
+          CMD ["-C", "/dnsmasq.conf"]
+    - path: /opt/ocp-ipi-baremetal-lab/dhcp/dnsmasq.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          no-daemon
+          interface=baremetal
+          dhcp-range=192.168.123.2,192.168.123.254,255.255.255.0
+          except-interface=lo
+          bind-interfaces
+          log-dhcp
+          dhcp-authoritative
+          log-async
+          dhcp-host=52:54:00:11:22:a1,master0.ocp.example.local,192.168.123.91
+          dhcp-host=52:54:00:11:22:a2,master1.ocp.example.local,192.168.123.92
+          dhcp-host=52:54:00:11:22:a3,master2.ocp.example.local,192.168.123.93
+          dhcp-host=52:54:00:11:22:a4,worker0.ocp.example.local,192.168.123.94
+          dhcp-host=52:54:00:11:22:a5,worker1.ocp.example.local,192.168.123.95
+    - path: /home/kni/Makefile
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          RELEASE ?= stable-4.10
+          LOGLEVEL ?= info
+          SCRIPT_DIR = $(shell cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )
+          CONTAINERS = $(shell sudo podman ps --format {{.Names}} | sort | xargs)
+          VMS = $(shell sudo virsh list --all --name | head -n -1 | wc -l)
+          
+          check-env:
+          ifndef OCM_TOKEN
+                $(error OCM_TOKEN is undefined | Get it from https://cloud.redhat.com/openshift/token)
+          endif
+
+          check-containers:
+          ifneq ($(CONTAINERS),dhcp vbmc webserver)
+                $(error The containerized services (dhcp vbmc webserver) are not ready. Check with 'sudo podman ps' and wait for a while to retry)
+          endif
+
+          check-vms:
+          ifneq ($(VMS),5)
+                $(error The VMs are not ready. Please restart the services with 'sudo systemctl restart master0 master1 master2 worker0 worker1' and retry)
+          endif
+          
+          .PHONY: ssh-pullsecret
+          
+          ssh-pullsecret: check-env
+                @echo "Generating SSH keys and pullsecret ..."
+                @ocp-ipi-baremetal-lab/ssh-pullsecret.sh $(OCM_TOKEN)
+
+          .PHONY: install-config
+
+          install-config: /home/kni/ocp-ipi-baremetal-lab/pullsecret /home/kni/ocp-ipi-baremetal-lab/id_ed25519.pub
+                @ocp-ipi-baremetal-lab/install-config.sh $(RELEASE)
+
+          .PHONY: manifests
+
+          manifests:
+                @echo "Generating manifests ..."
+                @/usr/local/bin/openshift-baremetal-install --log-level=${LOGLEVEL} --dir=$(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs create manifests
+
+          .PHONY: ignition-configs
+
+          ignition-configs: $(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs/install-config.yaml
+                @echo "Generating ignition-configs ..."
+                @/usr/local/bin/openshift-baremetal-install --log-level=${LOGLEVEL} --dir=$(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs create ignition-configs
+          
+          .PHONY: cluster
+          
+          cluster: $(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs/install-config.yaml check-containers check-vms
+                @echo "Creating cluster ..."
+                @/usr/local/bin/openshift-baremetal-install --log-level=${LOGLEVEL} --dir=$(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs create cluster
+          
+          .PHONY: clean
+          
+          clean:
+                @echo "Removing old bootstrap resources ..."
+                -@$(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clean-bootstrap.sh
+                @echo "Removing installation directory ..."
+                -@rm -rfv $(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs
+                @echo "Powering off master nodes ..."
+                -@for i in master0 master1 master2; do sudo virsh destroy $$i; done
+                @echo "!!! IGNORE THE ERRORS !!!"
+          
+          .PHONY: destroy
+          
+          destroy:
+                @echo "Destroying bootrap ..."
+                -@openshift-baremetal-install destroy --log-level=${LOGLEVEL} --dir=/home/kni/ocp-ipi-baremetal-lab/clusterconfigs bootstrap
+                @echo "Destroying cluster ..."
+                -@openshift-baremetal-install destroy --log-level=${LOGLEVEL} --dir=/home/kni/ocp-ipi-baremetal-lab/clusterconfigs cluster
+                @echo "Removing installation directory ..."
+                -@rm -rfv $(SCRIPT_DIR)/ocp-ipi-baremetal-lab/clusterconfigs
+                @echo "Powering off master nodes ..."
+                -@for i in master0 master1 master2; do sudo virsh destroy $$i; done
+                @echo "!!! IGNORE THE ERRORS !!!"
+
+          .PHONY: help
+
+          help:
+                @echo "Usage: oibl [SUBCOMMAND] [VARIABLE_NAME]=<variable>"
+                @echo ""
+                @echo "Subcommands:"
+                @echo "  ssh-pullsecret OCM_TOKEN=<OCM_TOKEN>   Generate SSH keys and download pullsecret file."
+                @echo "  install-config                         Generate install-config.yaml file."
+                @echo "  cluster                                Create an OpenShift cluster."
+                @echo "  destroy                                Destroy installed cluster."
+                @echo "  clean                                  Clean old cluster resources."
+                @echo ""
+                @echo "Example:"
+                @echo "  oibl cluster LOGLEVEL=debug"
+                @echo ""
+                @echo "Variables:"
+                @echo "  OCM_TOKEN (token from https://cloud.redhat.com/openshift/token)"
+                @echo "  RELEASE (stable-4.10, latest-4.9, 4.9.0, etc)"
+                @echo "  LOGLEVEL (debug, info, warn, error)"
+    - path: /home/kni/ocp-ipi-baremetal-lab/clean-bootstrap.sh
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          #!/bin/bash
+          #
+          # Remove old bootstrap resources if any are left over from a previous deployment attempt
+          
+          set -xo pipefail
+          
+          BOOTSTRAP_RESOURCES=$(sudo virsh pool-list | grep bootstrap | awk '{print $1}' | xargs)
+          
+          if [ -z ${BOOTSTRAP_RESOURCES} ]; then
+                  echo "No bootstrap resources ..."
+          else
+                  for RESOURCE in ${BOOTSTRAP_RESOURCES}; do
+                          sudo virsh destroy ${RESOURCE}
+                          sudo virsh undefine ${RESOURCE}
+                          sudo virsh pool-start ${RESOURCE}
+                          sudo virsh vol-delete ${RESOURCE} --pool ${RESOURCE}
+                          sudo virsh vol-delete ${RESOURCE}-base --pool ${RESOURCE}
+                          sudo virsh vol-delete ${RESOURCE}.ign --pool ${RESOURCE}
+                          sudo virsh pool-destroy ${RESOURCE}
+                          sudo virsh pool-delete ${RESOURCE}
+                          sudo virsh pool-undefine ${RESOURCE}
+                  done
+          fi
+    - path: /home/kni/ocp-ipi-baremetal-lab/ssh-pullsecret.sh
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          #!/bin/bash
+          # Download pull secret using OpenShift Cluster Manager API Token
+          
+          set -euo pipefail
+          
+          function USAGE {
+                  echo "Usage: $0 '<OCM API Token>'"
+                  echo "You need to authenticate using a Bearer token, which you can get from the link: https://cloud.redhat.com/openshift/token"
+                  exit 1
+          }
+          
+          function DOWNLOAD_PULLSECRET {
+                  export BEARER=$(curl \
+                          --silent \
+                          --data-urlencode "grant_type=refresh_token" \
+                          --data-urlencode "client_id=cloud-services" \
+                          --data-urlencode "refresh_token=${OCM_API_TOKEN}" \
+                          https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token | \
+                          jq -r .access_token)
+                  curl -s -X POST https://api.openshift.com/api/accounts_mgmt/v1/access_token --header "Content-Type:application/json" --header "Authorization: Bearer $BEARER" > ${SCRIPT_DIR}/pullsecret
+          }
+          
+          function SSH_KEY {
+                  rm -fv ${SCRIPT_DIR}/id_ed25519 ${SCRIPT_DIR}/id_ed25519.pub
+                  ssh-keygen -q -t ed25519 -N '' -f ${SCRIPT_DIR}/id_ed25519
+          }
+          
+          SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )"
+          ARG_COUNT=${#}
+          OCM_API_TOKEN=${1}
+          ARG_SIZE=${#OCM_API_TOKEN}
+          
+          if [ ${ARG_COUNT} -eq 1 ] && [ ${ARG_SIZE} -gt 50 ]; then
+                  ( SSH_KEY && echo "✔ SSH key generated!" ) || echo "✗ Error: SSH key generation failed!"
+                  ( DOWNLOAD_PULLSECRET 1>/dev/null && echo "✔ Pull secret downloaded!" ) || echo "✗ Error: Pull secret download failed!"
+          else
+                  USAGE
+          fi
+    - path: /home/kni/ocp-ipi-baremetal-lab/install-config.sh
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          set -euo pipefail
+
+          SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )"
+          export VERSION=${1}
+          export RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/release.txt | grep 'Pull From: quay.io' | awk -F ' ' '{print $3}')
+          export cmd=openshift-baremetal-install
+          export pullsecret_file=${SCRIPT_DIR}/pullsecret
+          export extract_dir=${SCRIPT_DIR}
+          echo "Downloading oc binary ..."
+          curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/openshift-client-linux.tar.gz | tar zxf - -C ${SCRIPT_DIR} oc
+          sudo mv ${SCRIPT_DIR}/oc /usr/local/bin
+          echo "✔ Downloaded!"
+          echo "Downloading openshift-install binary ..."
+          /usr/local/bin/oc adm release extract --registry-config "${pullsecret_file}" --command=$cmd --to "${extract_dir}" ${RELEASE_IMAGE}
+          sudo mv ${SCRIPT_DIR}/openshift-baremetal-install /usr/local/bin
+          echo "✔ Downloaded!"
+          export RHCOS_QEMU_URI=$(/usr/local/bin/openshift-baremetal-install coreos print-stream-json | jq -r --arg ARCH "$(arch)" '.architectures[$ARCH].artifacts.qemu.formats["qcow2.gz"].disk.location')
+          export RHCOS_QEMU_NAME=${RHCOS_QEMU_URI##*/}
+          export RHCOS_QEMU_UNCOMPRESSED_SHA256=$(/usr/local/bin/openshift-baremetal-install coreos print-stream-json | jq -r --arg ARCH "$(arch)" '.architectures[$ARCH].artifacts.qemu.formats["qcow2.gz"].disk["uncompressed-sha256"]')
+          echo "Downloading bootstrap os image ..."
+          [ -f "/home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache/${RHCOS_QEMU_NAME}" ] || curl -sL ${RHCOS_QEMU_URI} -o /home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache/${RHCOS_QEMU_NAME}
+          echo "✔ Downloaded!"
+          export BAREMETAL_IP=$(ip addr show dev baremetal | awk '/inet /{print $2}' | cut -d"/" -f1)
+          export BOOTSTRAP_OS_IMAGE="http://${BAREMETAL_IP}:8080/${RHCOS_QEMU_NAME}?sha256=${RHCOS_QEMU_UNCOMPRESSED_SHA256}"
+          echo "Generating install-config.yaml file ..."
+          cat << EOF > ${SCRIPT_DIR}/install-config.yaml
+          apiVersion: v1
+          baseDomain: example.local
+          metadata:
+            name: ocp
+          networking:
+            machineNetwork:
+            - cidr: 192.168.123.0/24
+            networkType: OVNKubernetes
+          compute:
+          - name: worker
+            replicas: 0
+          controlPlane:
+            name: master
+            replicas: 3
+            platform:
+              baremetal: {}
+          platform:
+            baremetal:
+              libvirtURI: qemu+tcp://localhost/system
+              bootstrapOSImage: ${BOOTSTRAP_OS_IMAGE}
+              apiVIP: 192.168.123.88
+              ingressVIP: 192.168.123.89
+              provisioningNetworkCIDR: 172.22.0.0/24
+              hosts:
+                - name: master0
+                  role: master
+                  bmc:
+                    address: ipmi://192.168.123.1:6230
+                    username: admin
+                    password: password
+                  bootMACAddress: 52:54:00:11:22:b1
+                  hardwareProfile: libvirt
+                  rootDeviceHints:
+                   deviceName: "/dev/vda"
+                - name: master1
+                  role: master
+                  bmc:
+                    address: ipmi://192.168.123.1:6231
+                    username: admin
+                    password: password
+                  bootMACAddress: 52:54:00:11:22:b2
+                  hardwareProfile: libvirt
+                  rootDeviceHints:
+                   deviceName: "/dev/vda"
+                - name: master2
+                  role: master
+                  bmc:
+                    address: ipmi://192.168.123.1:6232
+                    username: admin
+                    password: password
+                  bootMACAddress: 52:54:00:11:22:b3
+                  hardwareProfile: libvirt
+                  rootDeviceHints:
+                   deviceName: "/dev/vda"
+          pullSecret: '$(cat ${SCRIPT_DIR}/pullsecret)'
+          sshKey: '$(cat ${SCRIPT_DIR}/id_ed25519.pub)'
+          EOF
+          echo "✔ Generated!"
+          mkdir -p ${SCRIPT_DIR}/clusterconfigs
+          echo "Copying install-config.yaml file to clusterconfigs direcotory ..."
+          cp ${SCRIPT_DIR}/install-config.yaml ${SCRIPT_DIR}/clusterconfigs/
+          echo "✔ Copied!"
+    - path: /opt/ocp-ipi-baremetal-lab/host/broadcast.sh
+      mode: 0755
+      overwrite: true
+      contents:
+        inline: |
+          #!/bin/sh
+          while true; do if [[ $(podman ps --format json | jq -r '.[] | .Names | .[]' | wc -l) == "3" ]]; then echo -e "The containerized services ($(podman ps --format json | jq -r '.[] | .Names | .[]' | xargs)) are ready.\nYou can start the OpenShift baremetal IPI installation now." | wall -n; break; fi; done
+    - path: /home/kni/.bashrc
+      append:
+        - inline: |
+            alias oibl='make'
+            export EDITOR=vi
+            export KUBECONFIG=/home/kni/ocp-ipi-baremetal-lab/clusterconfigs/auth/kubeconfig
+            sed -i -e 's/      /\t/g' /home/kni/Makefile
+    - path: /home/kni/ocp-ipi-baremetal-lab/worker0.yaml
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: openshift-worker-0-bmc-secret
+            namespace: openshift-machine-api
+          type: Opaque
+          data:
+            username: YWRtaW4K
+            password: cGFzc3dvcmQK
+          ---
+          apiVersion: metal3.io/v1alpha1
+          kind: BareMetalHost
+          metadata:
+            name: openshift-worker-0
+            namespace: openshift-machine-api
+          spec:
+            online: true
+            bootMACAddress: 52:54:00:11:22:b4
+            bmc:
+              address: ipmi://192.168.123.1:6233
+              credentialsName: openshift-worker-0-bmc-secret
+            rootDeviceHints:
+              deviceName: "/dev/vda"
+    - path: /home/kni/ocp-ipi-baremetal-lab/worker1.yaml
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: openshift-worker-1-bmc-secret
+            namespace: openshift-machine-api
+          type: Opaque
+          data:
+            username: YWRtaW4K
+            password: cGFzc3dvcmQK
+          ---
+          apiVersion: metal3.io/v1alpha1
+          kind: BareMetalHost
+          metadata:
+            name: openshift-worker-1
+            namespace: openshift-machine-api
+          spec:
+            online: true
+            bootMACAddress: 52:54:00:11:22:b5
+            bmc:
+              address: ipmi://192.168.123.1:6234
+              credentialsName: openshift-worker-1-bmc-secret
+            rootDeviceHints:
+              deviceName: "/dev/vda"

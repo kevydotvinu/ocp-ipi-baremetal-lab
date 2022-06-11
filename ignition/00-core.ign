@@ -1,0 +1,508 @@
+{
+  "ignition": {
+    "version": "3.0.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "gecos": "CoreOS Admin",
+        "groups": [
+          "sudo",
+          "wheel",
+          "adm",
+          "systemd-journal"
+        ],
+        "name": "core"
+      },
+      {
+        "gecos": "ocp-ipi-baremtal-lab user",
+        "groups": [
+          "sudo",
+          "wheel",
+          "adm",
+          "systemd-journal"
+        ],
+        "name": "kni",
+        "passwordHash": "$y$j9T$rVVNGAWx1YhOFEOQQdk5v1$CXiP2XQROTh/5e4ZB66WaYafvNkfO/ZqVjaXYwx5Fo2"
+      }
+    ]
+  },
+  "storage": {
+    "directories": [
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab",
+        "user": {
+          "name": "kni"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache",
+        "user": {
+          "name": "kni"
+        },
+        "mode": 493
+      }
+    ],
+    "files": [
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/Dockerfile",
+        "contents": {
+          "source": "data:,FROM%20fedora%0AMAINTAINER%20%22Vinu%20K%22%20%3Cvkochuku%40redhat.com%3E%0AADD%20run.sh%20%2Frun.sh%0AADD%20.vbmc%20%2Fhome%2Fvbmc%2F.vbmc%0ARUN%20yum%20install%20-y%20procps%20python3-pip%20libvirt-devel%20python3-devel%20gcc%20%26%26%20%5C%0A%20%20%20%20yum%20clean%20all%20%26%26%20%5C%0A%20%20%20%20rm%20-rf%20%2Fvar%2Fcache%2Fyum%20%26%26%20%5C%0A%20%20%20%20useradd%20-u%201001%20-m%20-d%20%2Fhome%2Fvbmc%20-s%20%2Fbin%2Fbash%20vbmc%20%26%26%20%5C%0A%20%20%20%20chown%20vbmc%3Avbmc%20-R%20%2Fhome%2Fvbmc%0AUSER%20vbmc%0ARUN%20pip3%20install%20--user%20virtualbmc%0AENTRYPOINT%20%5B%22bash%22%2C%20%22-c%22%2C%20%22%2Frun.sh%22%5D%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/run.sh",
+        "contents": {
+          "source": "data:,set%20-x%0Arm%20-fv%20%2Fhome%2Fvbmc%2F.vbmc%2Fmaster.pid%0A%2Fhome%2Fvbmc%2F.local%2Fbin%2Fvbmcd%20--foreground%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "id": 1001
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master0/config",
+        "user": {
+          "id": 1001
+        },
+        "contents": {
+          "source": "data:,%5BVirtualBMC%5D%0Ausername%20%3D%20admin%0Apassword%20%3D%20password%0Aaddress%20%3D%20192.168.123.1%0Aport%20%3D%206230%0Adomain_name%20%3D%20master0%0Alibvirt_uri%20%3D%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0Aactive%20%3D%20True%0A"
+        },
+        "mode": 420
+      },
+      {
+        "group": {
+          "id": 1001
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master1/config",
+        "user": {
+          "id": 1001
+        },
+        "contents": {
+          "source": "data:,%5BVirtualBMC%5D%0Ausername%20%3D%20admin%0Apassword%20%3D%20password%0Aaddress%20%3D%20192.168.123.1%0Aport%20%3D%206231%0Adomain_name%20%3D%20master1%0Alibvirt_uri%20%3D%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0Aactive%20%3D%20True%0A"
+        },
+        "mode": 420
+      },
+      {
+        "group": {
+          "id": 1001
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master2/config",
+        "user": {
+          "id": 1001
+        },
+        "contents": {
+          "source": "data:,%5BVirtualBMC%5D%0Ausername%20%3D%20admin%0Apassword%20%3D%20password%0Aaddress%20%3D%20192.168.123.1%0Aport%20%3D%206232%0Adomain_name%20%3D%20master2%0Alibvirt_uri%20%3D%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0Aactive%20%3D%20True%0A"
+        },
+        "mode": 420
+      },
+      {
+        "group": {
+          "id": 1001
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker0/config",
+        "user": {
+          "id": 1001
+        },
+        "contents": {
+          "source": "data:,%5BVirtualBMC%5D%0Ausername%20%3D%20admin%0Apassword%20%3D%20password%0Aaddress%20%3D%20192.168.123.1%0Aport%20%3D%206233%0Adomain_name%20%3D%20worker0%0Alibvirt_uri%20%3D%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0Aactive%20%3D%20True%0A"
+        },
+        "mode": 420
+      },
+      {
+        "group": {
+          "id": 1001
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker1/config",
+        "user": {
+          "id": 1001
+        },
+        "contents": {
+          "source": "data:,%5BVirtualBMC%5D%0Ausername%20%3D%20admin%0Apassword%20%3D%20password%0Aaddress%20%3D%20192.168.123.1%0Aport%20%3D%206234%0Adomain_name%20%3D%20worker1%0Alibvirt_uri%20%3D%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0Aactive%20%3D%20True%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/resolv.conf",
+        "contents": {
+          "source": "data:,"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/sudoers.d/kni",
+        "contents": {
+          "source": "data:,kni%20ALL%3D(ALL)%20NOPASSWD%3A%20ALL%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/libvirt/libvirtd.conf",
+        "contents": {
+          "source": "data:,listen_tls%20%3D%200%0Alisten_tcp%20%3D%201%0Atcp_port%20%3D%20%2216509%22%0Atls_port%20%3D%20%2216514%22%0Aauth_tcp%20%3D%20%22none%22%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/libvirt/libvirt.conf",
+        "contents": {
+          "source": "data:,uri_default%20%3D%20%22qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%22%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/sysctl.d/99-sysctl.conf",
+        "contents": {
+          "source": "data:,net.ipv4.ip_forward%20%3D%201%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/ssh/sshd_config.d/20-enable-passwords.conf",
+        "contents": {
+          "source": "data:,PasswordAuthentication%20yes%0A"
+        },
+        "mode": 420
+      },
+      {
+        "path": "/opt/ocp-ipi-baremetal-lab/host/configure.sh",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fsh%0A%2Fusr%2Fsbin%2Fiptables%20-t%20nat%20-I%20POSTROUTING%20-s%20192.168.123.0%2F24%20!%20-d%20192.168.123.0%2F24%20-j%20MASQUERADE%0A%2Fusr%2Fsbin%2Fiptables%20-t%20nat%20-I%20PREROUTING%20-p%20tcp%20-i%20%24(%2Fusr%2Fsbin%2Fip%20r%20%7C%20grep%20default%20%7C%20awk%20'%7Bprint%20%245%7D')%20--dport%20443%20-j%20DNAT%20--to-destination%20192.168.123.89%3A443%0A%2Fusr%2Fsbin%2Fiptables%20-t%20nat%20-I%20PREROUTING%20-p%20tcp%20-i%20%24(%2Fusr%2Fsbin%2Fip%20r%20%7C%20grep%20default%20%7C%20awk%20'%7Bprint%20%245%7D')%20--dport%206443%20-j%20DNAT%20--to-destination%20192.168.123.89%3A6443%0Asystemctl%20start%20libvirtd-tcp.socket%0A"
+        },
+        "mode": 493
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/ens3.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dens3%0Atype%3Dethernet%0Aautoconnect%3Dyes%0Ainterface-name%3Dens3%0A%5Bipv4%5D%0Amethod%3Dauto%0A%5Bipv6%5D%0Amethod%3Ddisabled%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/baremetal-dummy.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dbaremetal-dummy%0Atype%3Ddummy%0Ainterface-name%3Dbaremetal-dummy%0Aautoconnect%3Dyes%0Amaster%3Dbaremetal%0Aslave-type%3Dbridge%0A%5Bipv4%5D%0Amethod%3Dlink-local%0A%5Bipv6%5D%0Amethod%3Ddisabled%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/baremetal.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dbaremetal%0Atype%3Dbridge%0Aautoconnect%3Dyes%0Ainterface-name%3Dbaremetal%0A%5Bipv4%5D%0Amethod%3Dmanual%0Aaddresses%3D192.168.123.1%0A%5Bipv6%5D%0Amethod%3Ddisabled%0A%5Bbridge%5D%0Amac-address%3D52%3A54%3A00%3A11%3A22%3Aa0%0Ainterface-name%3Dbaremetal%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/baremetal-slave.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dbaremetal-slave%0Atype%3Dethernet%0Ainterface-name%3Dbaremetal-dummy%0Amaster%3Dbaremetal%0Aautoconnect%3Dyes%0Aslave-type%3Dbridge%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/provision-dummy.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dprovision-dummy%0Atype%3Ddummy%0Ainterface-name%3Dprovision-dummy%0Aautoconnect%3Dyes%0Amaster%3Dprovisioning%0Aslave-type%3Dbridge%0A%5Bipv4%5D%0Amethod%3Dlink-local%0A%5Bipv6%5D%0Amethod%3Ddisabled%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/provisioning.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dprovisioning%0Atype%3Dbridge%0Ainterface-name%3Dprovisioning%0Aautoconnect%3Dyes%0A%5Bipv4%5D%0Amethod%3Dmanual%0Aaddresses%3D172.22.0.254%2F24%0A%5Bipv6%5D%0Amethod%3Ddisabled%0A%5Bbridge%5D%0Amac-address%3D52%3A54%3A00%3A11%3A22%3Ab0%0Ainterface-name%3Dprovisioning%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/system-connections/provisioning-slave.nmconnection",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bconnection%5D%0Aid%3Dprovisioning-slave%0Atype%3Dethernet%0Ainterface-name%3Dprovision-dummy%0Amaster%3Dprovisioning%0Aautoconnect%3Dyes%0Aslave-type%3Dbridge%0A"
+        },
+        "mode": 384
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/conf.d/ocp-ipi-baremetal-lab.conf",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,%5Bmain%5D%0Aplugins%3Dkeyfile%0Adns%3Ddnsmasq%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/NetworkManager/dnsmasq.d/ocp-ipi-baremetal-lab.conf",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,address%3D%2F.apps.ocp.example.local%2F192.168.123.89%0Aaddn-hosts%3D%2Fetc%2Fhosts%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/etc/hosts",
+        "user": {
+          "name": "root"
+        },
+        "contents": {
+          "source": "data:,127.0.0.1%20localhost%20localhost.localdomain%20ocp-ipi-baremetal-lab.ocp.example.local%0A192.168.123.88%20api.ocp.example.local%0A192.168.123.90%20bootstrap.ocp.example.local%0A192.168.123.91%20master0.ocp.example.local%0A192.168.123.92%20master1.ocp.example.local%0A192.168.123.93%20master2.ocp.example.local%0A192.168.123.94%20worker0.ocp.example.local%0A192.168.123.95%20worker1.ocp.example.local%0A192.168.123.1%20ocp-ipi-baremetal-lab.ocp.example.local%20lb.ocp.example.local%20mirror.ocp.example.local%20proxy.ocp.example.local%0A"
+        },
+        "mode": 420
+      },
+      {
+        "path": "/etc/zincati/config.d/90-disable-auto-updates.toml",
+        "contents": {
+          "source": "data:,%5Bupdates%5D%0Aenabled%20%3D%20false%0A"
+        }
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0A%23%20Create%20node%20for%20ocp-ipi-baremetal-lab%0A%0Aset%20-euxo%20pipefail%0A%0AVM_NAME%3D%241%0AMAC1%3D%242%0AMAC2%3D%243%0AVM_DIR%3D%2Fopt%2Focp-ipi-baremetal-lab%2Flibvirt%0AVM_DISK%3D%24VM_DIR%2F%24VM_NAME%2F%24VM_NAME.img%0AVCPU%3D%24%7B4%3A-4%7D%0AMEMORY%3D%24%7B5%3A-16384%7D%0ANETWORK1%3Dbridge%3Dprovisioning%2Cmac%3D%24MAC1%0ANETWORK2%3Dbridge%3Dbaremetal%2Cmac%3D%24MAC2%0A%0Aif%20virsh%20list%20%7C%20grep%20%24VM_NAME%202%3E%261%3E%2Fdev%2Fnull%3B%20then%20virsh%20destroy%20%24VM_NAME%202%3E%2Fdev%2Fnull%3B%20virsh%20undefine%20%24VM_NAME%202%3E%2Fdev%2Fnull%3B%20fi%0Aif%20virsh%20list%20--all%20%7C%20grep%20%24VM_NAME%202%3E%261%3E%2Fdev%2Fnull%3B%20then%20virsh%20undefine%20%24VM_NAME%202%3E%2Fdev%2Fnull%3B%20fi%0Aif%20%5B%20!%20-f%20%24VM_DISK%20%5D%20%3B%20then%20mkdir%20-p%20%24VM_DIR%2F%24VM_NAME%3B%20qemu-img%20create%20%24VM_DISK%2060G%3B%20fi%0A%0Avirsh%20define%20%3C(virt-install%20--name%20%24VM_NAME%20%5C%0A%20%20%20%20%20%20%20%20--os-variant%20fedora-coreos-stable%20%5C%0A%20%20%20%20%20%20%20%20--vcpus%20%24VCPU%20%5C%0A%20%20%20%20%20%20%20%20--memory%20%24MEMORY%20%5C%0A%20%20%20%20%20%20%20%20--disk%20%24VM_DISK%20%5C%0A%20%20%20%20%20%20%20%20--network%20%24NETWORK1%20%5C%0A%20%20%20%20%20%20%20%20--network%20%24NETWORK2%20%5C%0A%20%20%20%20%20%20%20%20--pxe%20%5C%0A%20%20%20%20%20%20%20%20--boot%20network%2Chd%20%5C%0A%20%20%20%20%20%20%20%20--graphics%20spice%2Clisten%3D0.0.0.0%20%5C%0A%20%20%20%20%20%20%20%20--video%20virtio%20%5C%0A%20%20%20%20%20%20%20%20--channel%20spicevmc%20%5C%0A%20%20%20%20%20%20%20%20--console%20pty%2Ctarget.type%3Dvirtio%20%5C%0A%20%20%20%20%20%20%20%20--serial%20pty%20%5C%0A%20%20%20%20%20%20%20%20--noautoconsole%20%5C%0A%20%20%20%20%20%20%20%20--print-xml%202)%0Atouch%20%2Fopt%2Focp-ipi-baremetal-lab%2F%24VM_NAME.done%0A"
+        },
+        "mode": 493
+      },
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/dhcp/Containerfile",
+        "contents": {
+          "source": "data:,FROM%20fedora%0AMAINTAINER%20%22Vinu%20K%22%20%3Cvkochuku%40redhat.com%3E%0ARUN%20yum%20install%20-y%20dnsmasq%0AADD%20dnsmasq.conf%20%2Fdnsmasq.conf%0AENTRYPOINT%20%5B%22dnsmasq%22%5D%0ACMD%20%5B%22-C%22%2C%20%22%2Fdnsmasq.conf%22%5D%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/dhcp/dnsmasq.conf",
+        "contents": {
+          "source": "data:,no-daemon%0Ainterface%3Dbaremetal%0Adhcp-range%3D192.168.123.2%2C192.168.123.254%2C255.255.255.0%0Aexcept-interface%3Dlo%0Abind-interfaces%0Alog-dhcp%0Adhcp-authoritative%0Alog-async%0Adhcp-host%3D52%3A54%3A00%3A11%3A22%3Aa1%2Cmaster0.ocp.example.local%2C192.168.123.91%0Adhcp-host%3D52%3A54%3A00%3A11%3A22%3Aa2%2Cmaster1.ocp.example.local%2C192.168.123.92%0Adhcp-host%3D52%3A54%3A00%3A11%3A22%3Aa3%2Cmaster2.ocp.example.local%2C192.168.123.93%0Adhcp-host%3D52%3A54%3A00%3A11%3A22%3Aa4%2Cworker0.ocp.example.local%2C192.168.123.94%0Adhcp-host%3D52%3A54%3A00%3A11%3A22%3Aa5%2Cworker1.ocp.example.local%2C192.168.123.95%0A"
+        },
+        "mode": 420
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/Makefile",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,RELEASE%20%3F%3D%20stable-4.10%0ALOGLEVEL%20%3F%3D%20info%0ASCRIPT_DIR%20%3D%20%24(shell%20cd%20--%20%22%24(%20dirname%20--%20%22%24%7BBASH_SOURCE%5B0%5D%3A-%240%7D%22%3B%20)%22%20%26%3E%20%2Fdev%2Fnull%20%26%26%20pwd%202%3E%20%2Fdev%2Fnull%3B%20)%0ACONTAINERS%20%3D%20%24(shell%20sudo%20podman%20ps%20--format%20%7B%7B.Names%7D%7D%20%7C%20sort%20%7C%20xargs)%0AVMS%20%3D%20%24(shell%20sudo%20virsh%20list%20--all%20--name%20%7C%20head%20-n%20-1%20%7C%20wc%20-l)%0A%0Acheck-env%3A%0Aifndef%20OCM_TOKEN%0A%20%20%20%20%20%20%24(error%20OCM_TOKEN%20is%20undefined%20%7C%20Get%20it%20from%20https%3A%2F%2Fcloud.redhat.com%2Fopenshift%2Ftoken)%0Aendif%0A%0Acheck-containers%3A%0Aifneq%20(%24(CONTAINERS)%2Cdhcp%20vbmc%20webserver)%0A%20%20%20%20%20%20%24(error%20The%20containerized%20services%20(dhcp%20vbmc%20webserver)%20are%20not%20ready.%20Check%20with%20'sudo%20podman%20ps'%20and%20wait%20for%20a%20while%20to%20retry)%0Aendif%0A%0Acheck-vms%3A%0Aifneq%20(%24(VMS)%2C5)%0A%20%20%20%20%20%20%24(error%20The%20VMs%20are%20not%20ready.%20Please%20restart%20the%20services%20with%20'sudo%20systemctl%20restart%20master0%20master1%20master2%20worker0%20worker1'%20and%20retry)%0Aendif%0A%0A.PHONY%3A%20ssh-pullsecret%0A%0Assh-pullsecret%3A%20check-env%0A%20%20%20%20%20%20%40echo%20%22Generating%20SSH%20keys%20and%20pullsecret%20...%22%0A%20%20%20%20%20%20%40ocp-ipi-baremetal-lab%2Fssh-pullsecret.sh%20%24(OCM_TOKEN)%0A%0A.PHONY%3A%20install-config%0A%0Ainstall-config%3A%20%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Fpullsecret%20%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Fid_ed25519.pub%0A%20%20%20%20%20%20%40ocp-ipi-baremetal-lab%2Finstall-config.sh%20%24(RELEASE)%0A%0A.PHONY%3A%20manifests%0A%0Amanifests%3A%0A%20%20%20%20%20%20%40echo%20%22Generating%20manifests%20...%22%0A%20%20%20%20%20%20%40%2Fusr%2Flocal%2Fbin%2Fopenshift-baremetal-install%20--log-level%3D%24%7BLOGLEVEL%7D%20--dir%3D%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%20create%20manifests%0A%0A.PHONY%3A%20ignition-configs%0A%0Aignition-configs%3A%20%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%2Finstall-config.yaml%0A%20%20%20%20%20%20%40echo%20%22Generating%20ignition-configs%20...%22%0A%20%20%20%20%20%20%40%2Fusr%2Flocal%2Fbin%2Fopenshift-baremetal-install%20--log-level%3D%24%7BLOGLEVEL%7D%20--dir%3D%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%20create%20ignition-configs%0A%0A.PHONY%3A%20cluster%0A%0Acluster%3A%20%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%2Finstall-config.yaml%20check-containers%20check-vms%0A%20%20%20%20%20%20%40echo%20%22Creating%20cluster%20...%22%0A%20%20%20%20%20%20%40%2Fusr%2Flocal%2Fbin%2Fopenshift-baremetal-install%20--log-level%3D%24%7BLOGLEVEL%7D%20--dir%3D%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%20create%20cluster%0A%0A.PHONY%3A%20clean%0A%0Aclean%3A%0A%20%20%20%20%20%20%40echo%20%22Removing%20old%20bootstrap%20resources%20...%22%0A%20%20%20%20%20%20-%40%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclean-bootstrap.sh%0A%20%20%20%20%20%20%40echo%20%22Removing%20installation%20directory%20...%22%0A%20%20%20%20%20%20-%40rm%20-rfv%20%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%0A%20%20%20%20%20%20%40echo%20%22Powering%20off%20master%20nodes%20...%22%0A%20%20%20%20%20%20-%40for%20i%20in%20master0%20master1%20master2%3B%20do%20sudo%20virsh%20destroy%20%24%24i%3B%20done%0A%20%20%20%20%20%20%40echo%20%22!!!%20IGNORE%20THE%20ERRORS%20!!!%22%0A%0A.PHONY%3A%20destroy%0A%0Adestroy%3A%0A%20%20%20%20%20%20%40echo%20%22Destroying%20bootrap%20...%22%0A%20%20%20%20%20%20-%40openshift-baremetal-install%20destroy%20--log-level%3D%24%7BLOGLEVEL%7D%20--dir%3D%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Fclusterconfigs%20bootstrap%0A%20%20%20%20%20%20%40echo%20%22Destroying%20cluster%20...%22%0A%20%20%20%20%20%20-%40openshift-baremetal-install%20destroy%20--log-level%3D%24%7BLOGLEVEL%7D%20--dir%3D%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Fclusterconfigs%20cluster%0A%20%20%20%20%20%20%40echo%20%22Removing%20installation%20directory%20...%22%0A%20%20%20%20%20%20-%40rm%20-rfv%20%24(SCRIPT_DIR)%2Focp-ipi-baremetal-lab%2Fclusterconfigs%0A%20%20%20%20%20%20%40echo%20%22Powering%20off%20master%20nodes%20...%22%0A%20%20%20%20%20%20-%40for%20i%20in%20master0%20master1%20master2%3B%20do%20sudo%20virsh%20destroy%20%24%24i%3B%20done%0A%20%20%20%20%20%20%40echo%20%22!!!%20IGNORE%20THE%20ERRORS%20!!!%22%0A%0A.PHONY%3A%20help%0A%0Ahelp%3A%0A%20%20%20%20%20%20%40echo%20%22Usage%3A%20oibl%20%5BSUBCOMMAND%5D%20%5BVARIABLE_NAME%5D%3D%3Cvariable%3E%22%0A%20%20%20%20%20%20%40echo%20%22%22%0A%20%20%20%20%20%20%40echo%20%22Subcommands%3A%22%0A%20%20%20%20%20%20%40echo%20%22%20%20ssh-pullsecret%20OCM_TOKEN%3D%3COCM_TOKEN%3E%20%20%20Generate%20SSH%20keys%20and%20download%20pullsecret%20file.%22%0A%20%20%20%20%20%20%40echo%20%22%20%20install-config%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20Generate%20install-config.yaml%20file.%22%0A%20%20%20%20%20%20%40echo%20%22%20%20cluster%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20Create%20an%20OpenShift%20cluster.%22%0A%20%20%20%20%20%20%40echo%20%22%20%20destroy%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20Destroy%20installed%20cluster.%22%0A%20%20%20%20%20%20%40echo%20%22%20%20clean%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20Clean%20old%20cluster%20resources.%22%0A%20%20%20%20%20%20%40echo%20%22%22%0A%20%20%20%20%20%20%40echo%20%22Example%3A%22%0A%20%20%20%20%20%20%40echo%20%22%20%20oibl%20cluster%20LOGLEVEL%3Ddebug%22%0A%20%20%20%20%20%20%40echo%20%22%22%0A%20%20%20%20%20%20%40echo%20%22Variables%3A%22%0A%20%20%20%20%20%20%40echo%20%22%20%20OCM_TOKEN%20(token%20from%20https%3A%2F%2Fcloud.redhat.com%2Fopenshift%2Ftoken)%22%0A%20%20%20%20%20%20%40echo%20%22%20%20RELEASE%20(stable-4.10%2C%20latest-4.9%2C%204.9.0%2C%20etc)%22%0A%20%20%20%20%20%20%40echo%20%22%20%20LOGLEVEL%20(debug%2C%20info%2C%20warn%2C%20error)%22%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/clean-bootstrap.sh",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0A%23%0A%23%20Remove%20old%20bootstrap%20resources%20if%20any%20are%20left%20over%20from%20a%20previous%20deployment%20attempt%0A%0Aset%20-xo%20pipefail%0A%0ABOOTSTRAP_RESOURCES%3D%24(sudo%20virsh%20pool-list%20%7C%20grep%20bootstrap%20%7C%20awk%20'%7Bprint%20%241%7D'%20%7C%20xargs)%0A%0Aif%20%5B%20-z%20%24%7BBOOTSTRAP_RESOURCES%7D%20%5D%3B%20then%0A%20%20%20%20%20%20%20%20echo%20%22No%20bootstrap%20resources%20...%22%0Aelse%0A%20%20%20%20%20%20%20%20for%20RESOURCE%20in%20%24%7BBOOTSTRAP_RESOURCES%7D%3B%20do%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20destroy%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20undefine%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20pool-start%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20vol-delete%20%24%7BRESOURCE%7D%20--pool%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20vol-delete%20%24%7BRESOURCE%7D-base%20--pool%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20vol-delete%20%24%7BRESOURCE%7D.ign%20--pool%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20pool-destroy%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20pool-delete%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20sudo%20virsh%20pool-undefine%20%24%7BRESOURCE%7D%0A%20%20%20%20%20%20%20%20done%0Afi%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/ssh-pullsecret.sh",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0A%23%20Download%20pull%20secret%20using%20OpenShift%20Cluster%20Manager%20API%20Token%0A%0Aset%20-euo%20pipefail%0A%0Afunction%20USAGE%20%7B%0A%20%20%20%20%20%20%20%20echo%20%22Usage%3A%20%240%20'%3COCM%20API%20Token%3E'%22%0A%20%20%20%20%20%20%20%20echo%20%22You%20need%20to%20authenticate%20using%20a%20Bearer%20token%2C%20which%20you%20can%20get%20from%20the%20link%3A%20https%3A%2F%2Fcloud.redhat.com%2Fopenshift%2Ftoken%22%0A%20%20%20%20%20%20%20%20exit%201%0A%7D%0A%0Afunction%20DOWNLOAD_PULLSECRET%20%7B%0A%20%20%20%20%20%20%20%20export%20BEARER%3D%24(curl%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20--silent%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20--data-urlencode%20%22grant_type%3Drefresh_token%22%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20--data-urlencode%20%22client_id%3Dcloud-services%22%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20--data-urlencode%20%22refresh_token%3D%24%7BOCM_API_TOKEN%7D%22%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20https%3A%2F%2Fsso.redhat.com%2Fauth%2Frealms%2Fredhat-external%2Fprotocol%2Fopenid-connect%2Ftoken%20%7C%20%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20jq%20-r%20.access_token)%0A%20%20%20%20%20%20%20%20curl%20-s%20-X%20POST%20https%3A%2F%2Fapi.openshift.com%2Fapi%2Faccounts_mgmt%2Fv1%2Faccess_token%20--header%20%22Content-Type%3Aapplication%2Fjson%22%20--header%20%22Authorization%3A%20Bearer%20%24BEARER%22%20%3E%20%24%7BSCRIPT_DIR%7D%2Fpullsecret%0A%7D%0A%0Afunction%20SSH_KEY%20%7B%0A%20%20%20%20%20%20%20%20rm%20-fv%20%24%7BSCRIPT_DIR%7D%2Fid_ed25519%20%24%7BSCRIPT_DIR%7D%2Fid_ed25519.pub%0A%20%20%20%20%20%20%20%20ssh-keygen%20-q%20-t%20ed25519%20-N%20''%20-f%20%24%7BSCRIPT_DIR%7D%2Fid_ed25519%0A%7D%0A%0ASCRIPT_DIR%3D%22%24(%20cd%20--%20%22%24(%20dirname%20--%20%22%24%7BBASH_SOURCE%5B0%5D%3A-%240%7D%22%3B%20)%22%20%26%3E%20%2Fdev%2Fnull%20%26%26%20pwd%202%3E%20%2Fdev%2Fnull%3B%20)%22%0AARG_COUNT%3D%24%7B%23%7D%0AOCM_API_TOKEN%3D%24%7B1%7D%0AARG_SIZE%3D%24%7B%23OCM_API_TOKEN%7D%0A%0Aif%20%5B%20%24%7BARG_COUNT%7D%20-eq%201%20%5D%20%26%26%20%5B%20%24%7BARG_SIZE%7D%20-gt%2050%20%5D%3B%20then%0A%20%20%20%20%20%20%20%20(%20SSH_KEY%20%26%26%20echo%20%22%E2%9C%94%20SSH%20key%20generated!%22%20)%20%7C%7C%20echo%20%22%E2%9C%97%20Error%3A%20SSH%20key%20generation%20failed!%22%0A%20%20%20%20%20%20%20%20(%20DOWNLOAD_PULLSECRET%201%3E%2Fdev%2Fnull%20%26%26%20echo%20%22%E2%9C%94%20Pull%20secret%20downloaded!%22%20)%20%7C%7C%20echo%20%22%E2%9C%97%20Error%3A%20Pull%20secret%20download%20failed!%22%0Aelse%0A%20%20%20%20%20%20%20%20USAGE%0Afi%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/install-config.sh",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,set%20-euo%20pipefail%0A%0ASCRIPT_DIR%3D%22%24(%20cd%20--%20%22%24(%20dirname%20--%20%22%24%7BBASH_SOURCE%5B0%5D%3A-%240%7D%22%3B%20)%22%20%26%3E%20%2Fdev%2Fnull%20%26%26%20pwd%202%3E%20%2Fdev%2Fnull%3B%20)%22%0Aexport%20VERSION%3D%24%7B1%7D%0Aexport%20RELEASE_IMAGE%3D%24(curl%20-s%20https%3A%2F%2Fmirror.openshift.com%2Fpub%2Fopenshift-v4%2Fclients%2Focp%2F%24VERSION%2Frelease.txt%20%7C%20grep%20'Pull%20From%3A%20quay.io'%20%7C%20awk%20-F%20'%20'%20'%7Bprint%20%243%7D')%0Aexport%20cmd%3Dopenshift-baremetal-install%0Aexport%20pullsecret_file%3D%24%7BSCRIPT_DIR%7D%2Fpullsecret%0Aexport%20extract_dir%3D%24%7BSCRIPT_DIR%7D%0Aecho%20%22Downloading%20oc%20binary%20...%22%0Acurl%20-s%20https%3A%2F%2Fmirror.openshift.com%2Fpub%2Fopenshift-v4%2Fclients%2Focp%2F%24VERSION%2Fopenshift-client-linux.tar.gz%20%7C%20tar%20zxf%20-%20-C%20%24%7BSCRIPT_DIR%7D%20oc%0Asudo%20mv%20%24%7BSCRIPT_DIR%7D%2Foc%20%2Fusr%2Flocal%2Fbin%0Aecho%20%22%E2%9C%94%20Downloaded!%22%0Aecho%20%22Downloading%20openshift-install%20binary%20...%22%0A%2Fusr%2Flocal%2Fbin%2Foc%20adm%20release%20extract%20--registry-config%20%22%24%7Bpullsecret_file%7D%22%20--command%3D%24cmd%20--to%20%22%24%7Bextract_dir%7D%22%20%24%7BRELEASE_IMAGE%7D%0Asudo%20mv%20%24%7BSCRIPT_DIR%7D%2Fopenshift-baremetal-install%20%2Fusr%2Flocal%2Fbin%0Aecho%20%22%E2%9C%94%20Downloaded!%22%0Aexport%20RHCOS_QEMU_URI%3D%24(%2Fusr%2Flocal%2Fbin%2Fopenshift-baremetal-install%20coreos%20print-stream-json%20%7C%20jq%20-r%20--arg%20ARCH%20%22%24(arch)%22%20'.architectures%5B%24ARCH%5D.artifacts.qemu.formats%5B%22qcow2.gz%22%5D.disk.location')%0Aexport%20RHCOS_QEMU_NAME%3D%24%7BRHCOS_QEMU_URI%23%23*%2F%7D%0Aexport%20RHCOS_QEMU_UNCOMPRESSED_SHA256%3D%24(%2Fusr%2Flocal%2Fbin%2Fopenshift-baremetal-install%20coreos%20print-stream-json%20%7C%20jq%20-r%20--arg%20ARCH%20%22%24(arch)%22%20'.architectures%5B%24ARCH%5D.artifacts.qemu.formats%5B%22qcow2.gz%22%5D.disk%5B%22uncompressed-sha256%22%5D')%0Aecho%20%22Downloading%20bootstrap%20os%20image%20...%22%0A%5B%20-f%20%22%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Frhcos_image_cache%2F%24%7BRHCOS_QEMU_NAME%7D%22%20%5D%20%7C%7C%20curl%20-sL%20%24%7BRHCOS_QEMU_URI%7D%20-o%20%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Frhcos_image_cache%2F%24%7BRHCOS_QEMU_NAME%7D%0Aecho%20%22%E2%9C%94%20Downloaded!%22%0Aexport%20BAREMETAL_IP%3D%24(ip%20addr%20show%20dev%20baremetal%20%7C%20awk%20'%2Finet%20%2F%7Bprint%20%242%7D'%20%7C%20cut%20-d%22%2F%22%20-f1)%0Aexport%20BOOTSTRAP_OS_IMAGE%3D%22http%3A%2F%2F%24%7BBAREMETAL_IP%7D%3A8080%2F%24%7BRHCOS_QEMU_NAME%7D%3Fsha256%3D%24%7BRHCOS_QEMU_UNCOMPRESSED_SHA256%7D%22%0Aecho%20%22Generating%20install-config.yaml%20file%20...%22%0Acat%20%3C%3C%20EOF%20%3E%20%24%7BSCRIPT_DIR%7D%2Finstall-config.yaml%0AapiVersion%3A%20v1%0AbaseDomain%3A%20example.local%0Ametadata%3A%0A%20%20name%3A%20ocp%0Anetworking%3A%0A%20%20machineNetwork%3A%0A%20%20-%20cidr%3A%20192.168.123.0%2F24%0A%20%20networkType%3A%20OVNKubernetes%0Acompute%3A%0A-%20name%3A%20worker%0A%20%20replicas%3A%200%0AcontrolPlane%3A%0A%20%20name%3A%20master%0A%20%20replicas%3A%203%0A%20%20platform%3A%0A%20%20%20%20baremetal%3A%20%7B%7D%0Aplatform%3A%0A%20%20baremetal%3A%0A%20%20%20%20libvirtURI%3A%20qemu%2Btcp%3A%2F%2Flocalhost%2Fsystem%0A%20%20%20%20bootstrapOSImage%3A%20%24%7BBOOTSTRAP_OS_IMAGE%7D%0A%20%20%20%20apiVIP%3A%20192.168.123.88%0A%20%20%20%20ingressVIP%3A%20192.168.123.89%0A%20%20%20%20provisioningNetworkCIDR%3A%20172.22.0.0%2F24%0A%20%20%20%20hosts%3A%0A%20%20%20%20%20%20-%20name%3A%20master0%0A%20%20%20%20%20%20%20%20role%3A%20master%0A%20%20%20%20%20%20%20%20bmc%3A%0A%20%20%20%20%20%20%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6230%0A%20%20%20%20%20%20%20%20%20%20username%3A%20admin%0A%20%20%20%20%20%20%20%20%20%20password%3A%20password%0A%20%20%20%20%20%20%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab1%0A%20%20%20%20%20%20%20%20hardwareProfile%3A%20libvirt%0A%20%20%20%20%20%20%20%20rootDeviceHints%3A%0A%20%20%20%20%20%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0A%20%20%20%20%20%20-%20name%3A%20master1%0A%20%20%20%20%20%20%20%20role%3A%20master%0A%20%20%20%20%20%20%20%20bmc%3A%0A%20%20%20%20%20%20%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6231%0A%20%20%20%20%20%20%20%20%20%20username%3A%20admin%0A%20%20%20%20%20%20%20%20%20%20password%3A%20password%0A%20%20%20%20%20%20%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab2%0A%20%20%20%20%20%20%20%20hardwareProfile%3A%20libvirt%0A%20%20%20%20%20%20%20%20rootDeviceHints%3A%0A%20%20%20%20%20%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0A%20%20%20%20%20%20-%20name%3A%20master2%0A%20%20%20%20%20%20%20%20role%3A%20master%0A%20%20%20%20%20%20%20%20bmc%3A%0A%20%20%20%20%20%20%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6232%0A%20%20%20%20%20%20%20%20%20%20username%3A%20admin%0A%20%20%20%20%20%20%20%20%20%20password%3A%20password%0A%20%20%20%20%20%20%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab3%0A%20%20%20%20%20%20%20%20hardwareProfile%3A%20libvirt%0A%20%20%20%20%20%20%20%20rootDeviceHints%3A%0A%20%20%20%20%20%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0ApullSecret%3A%20'%24(cat%20%24%7BSCRIPT_DIR%7D%2Fpullsecret)'%0AsshKey%3A%20'%24(cat%20%24%7BSCRIPT_DIR%7D%2Fid_ed25519.pub)'%0AEOF%0Aecho%20%22%E2%9C%94%20Generated!%22%0Amkdir%20-p%20%24%7BSCRIPT_DIR%7D%2Fclusterconfigs%0Aecho%20%22Copying%20install-config.yaml%20file%20to%20clusterconfigs%20direcotory%20...%22%0Acp%20%24%7BSCRIPT_DIR%7D%2Finstall-config.yaml%20%24%7BSCRIPT_DIR%7D%2Fclusterconfigs%2F%0Aecho%20%22%E2%9C%94%20Copied!%22%0A"
+        },
+        "mode": 493
+      },
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/host/broadcast.sh",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fsh%0Awhile%20true%3B%20do%20if%20%5B%5B%20%24(podman%20ps%20--format%20json%20%7C%20jq%20-r%20'.%5B%5D%20%7C%20.Names%20%7C%20.%5B%5D'%20%7C%20wc%20-l)%20%3D%3D%20%223%22%20%5D%5D%3B%20then%20echo%20-e%20%22The%20containerized%20services%20(%24(podman%20ps%20--format%20json%20%7C%20jq%20-r%20'.%5B%5D%20%7C%20.Names%20%7C%20.%5B%5D'%20%7C%20xargs))%20are%20ready.%5CnYou%20can%20start%20the%20OpenShift%20baremetal%20IPI%20installation%20now.%22%20%7C%20wall%20-n%3B%20break%3B%20fi%3B%20done%0A"
+        },
+        "mode": 493
+      },
+      {
+        "path": "/home/kni/.bashrc",
+        "append": [
+          {
+            "source": "data:,alias%20oibl%3D'make'%0Aexport%20EDITOR%3Dvi%0Aexport%20KUBECONFIG%3D%2Fhome%2Fkni%2Focp-ipi-baremetal-lab%2Fclusterconfigs%2Fauth%2Fkubeconfig%0Ased%20-i%20-e%20's%2F%20%20%20%20%20%20%2F%5Ct%2Fg'%20%2Fhome%2Fkni%2FMakefile%0A"
+          }
+        ]
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/worker0.yaml",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,apiVersion%3A%20v1%0Akind%3A%20Secret%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-0-bmc-secret%0A%20%20namespace%3A%20openshift-machine-api%0Atype%3A%20Opaque%0Adata%3A%0A%20%20username%3A%20YWRtaW4K%0A%20%20password%3A%20cGFzc3dvcmQK%0A---%0AapiVersion%3A%20metal3.io%2Fv1alpha1%0Akind%3A%20BareMetalHost%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-0%0A%20%20namespace%3A%20openshift-machine-api%0Aspec%3A%0A%20%20online%3A%20true%0A%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab4%0A%20%20bmc%3A%0A%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6233%0A%20%20%20%20credentialsName%3A%20openshift-worker-0-bmc-secret%0A%20%20rootDeviceHints%3A%0A%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/worker1.yaml",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,apiVersion%3A%20v1%0Akind%3A%20Secret%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-1-bmc-secret%0A%20%20namespace%3A%20openshift-machine-api%0Atype%3A%20Opaque%0Adata%3A%0A%20%20username%3A%20YWRtaW4K%0A%20%20password%3A%20cGFzc3dvcmQK%0A---%0AapiVersion%3A%20metal3.io%2Fv1alpha1%0Akind%3A%20BareMetalHost%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-1%0A%20%20namespace%3A%20openshift-machine-api%0Aspec%3A%0A%20%20online%3A%20true%0A%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab5%0A%20%20bmc%3A%0A%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6234%0A%20%20%20%20credentialsName%3A%20openshift-worker-1-bmc-secret%0A%20%20rootDeviceHints%3A%0A%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0A"
+        },
+        "mode": 493
+      }
+    ]
+  },
+  "systemd": {
+    "units": [
+      {
+        "enabled": false,
+        "mask": true,
+        "name": "systemd-resolved.service"
+      },
+      {
+        "enabled": true,
+        "name": "libvirtd-tcp.socket"
+      },
+      {
+        "contents": "[Unit]\nWants=network-online.target\nAfter=network-online.target\n\n[Service]\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/host/configure.sh\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "host-configure.service"
+      },
+      {
+        "contents": "[Unit]\nWants=libvirtd-tcp.socket\nAfter=libvirtd-tcp.socket\nRequires=libvirtd-tcp.socket\nConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master0.done\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master0 52:54:00:11:22:b1 52:54:00:11:22:a1\nExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master0.done\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "master0.service"
+      },
+      {
+        "contents": "[Unit]\nWants=libvirtd-tcp.socket\nAfter=libvirtd-tcp.socket\nRequires=libvirtd-tcp.socket\nConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master1.done\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master1 52:54:00:11:22:b2 52:54:00:11:22:a2\nExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master1.done\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "master1.service"
+      },
+      {
+        "contents": "[Unit]\nWants=libvirtd-tcp.socket\nAfter=libvirtd-tcp.socket\nRequires=libvirtd-tcp.socket\nConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master2.done\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh master2 52:54:00:11:22:b3 52:54:00:11:22:a3\nExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/master2.done\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "master2.service"
+      },
+      {
+        "contents": "[Unit]\nWants=libvirtd-tcp.socket\nAfter=libvirtd-tcp.socket\nRequires=libvirtd-tcp.socket\nConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker0.done\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh worker0 52:54:00:11:22:b4 52:54:00:11:22:a4 2 8192\nExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/worker0.done\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "worker0.service"
+      },
+      {
+        "contents": "[Unit]\nWants=libvirtd-tcp.socket\nAfter=libvirtd-tcp.socket\nRequires=libvirtd-tcp.socket\nConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker1.done\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/libvirt/create-vm.sh worker1 52:54:00:11:22:b5 52:54:00:11:22:a5 2 8192\nExecStartPost=/usr/bin/touch /opt/ocp-ipi-baremetal-lab/worker1.done\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "worker1.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Webserver for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=on-failure\nTimeoutStopSec=70\nExecStartPre=/bin/rm -f %t/%n.ctr-id\nExecStart=/usr/bin/podman run \\\n        --cidfile=%t/%n.ctr-id \\\n        --cgroups=no-conmon \\\n        --rm \\\n        --sdnotify=conmon \\\n        --replace \\\n        --detach \\\n        --net host \\\n        --name webserver \\\n        -v /home/kni/ocp-ipi-baremetal-lab/rhcos_image_cache:/var/www/html quay.io/centos7/httpd-24-centos7:latest\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "enabled": true,
+        "name": "webserver.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Podman container-e6d443b2ffab510db1684ca2833592e6f6de26cdb58a625eb0bb739e2e0b3be9.service\nDocumentation=man:podman-generate-systemd(1)\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStopSec=70\nTimeoutStartSec=600\nExecStartPre=/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/podman build /opt/ocp-ipi-baremetal-lab/vbmc --net host -t localhost/vbmc\nExecStart=/usr/bin/podman run \\\n        --cidfile=%t/%n.ctr-id \\\n        --cgroups=no-conmon \\\n        --rm \\\n        --sdnotify=conmon \\\n        --replace \\\n        -d \\\n        -ti \\\n        --name vbmc \\\n        --net host \\\n        localhost/vbmc\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "enabled": true,
+        "name": "vbmc.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Dnsmasq for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStartSec=180\nTimeoutStopSec=70\nExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/podman build --net host --tag localhost/dnsmasq /opt/ocp-ipi-baremetal-lab/dhcp\nExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dnsmasq\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "enabled": true,
+        "name": "dhcp.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=Check containers status\nAfter=selinux-configure.service\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/host/broadcast.sh\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",
+        "enabled": true,
+        "name": "broadcast.service"
+      }
+    ]
+  }
+}

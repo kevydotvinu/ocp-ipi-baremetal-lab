@@ -1,0 +1,127 @@
+# This manifest file defines things that should really only go
+# into "official" builds of Fedora CoreOS (such as including `fedora-release-coreos`)
+# or are very "opinionated" like disabling SSH passwords by default.
+
+ref: fedora/${basearch}/coreos/${stream}
+rojig:
+  license: MIT
+  name: fedora-coreos
+  summary: Fedora CoreOS ${stream}
+
+add-commit-metadata:
+  fedora-coreos.stream: ${stream}
+
+
+include: fedora-coreos-base.yaml
+conditional-include:
+  - if: prod == false
+    # long-term, would be good to support specifying a nested TreeComposeConfig
+    include: disable-zincati-and-pinger.yaml
+  - if: basearch == "aarch64"
+    # Fixup for kdump on aarch64 AWS instances
+    include: kdump-aarch64-aws-workaround.yaml
+  - if: basearch != "s390x"
+    # And remove some cruft from grub2
+    include: grub2-removals.yaml
+
+ostree-layers:
+  - overlay/15fcos
+
+automatic-version-prefix: "${releasever}.<date:%Y%m%d>.dev"
+mutate-os-release: "${releasever}"
+
+# All Fedora CoreOS streams share the same pool for locked files.
+lockfile-repos:
+  - fedora-coreos-pool
+
+packages:
+  - fedora-release-coreos
+  - fedora-repos-ostree
+  # fedora-repos-modular was converted into its own subpackage in f33
+  # Continue to include it in case users want to use it.
+  - fedora-repos-modular
+  # the archive repo for more reliable package layering
+  # https://github.com/coreos/fedora-coreos-tracker/issues/400
+  - fedora-repos-archive
+  # CL ships this.
+  - moby-engine
+  # Already pulled in by moby-engine, but let's be explicit. Typhoon uses it.
+  - containerd
+  # User metrics
+  - fedora-coreos-pinger
+  # Updates
+  - zincati
+  # Include and set the default editor
+  - nano nano-default-editor
+
+etc-group-members:
+  # Add the docker group to /etc/group
+  # https://github.com/coreos/fedora-coreos-tracker/issues/2
+  # This will be no longer needed when systemd-sysusers has been implemented:
+  # https://github.com/projectatomic/rpm-ostree/issues/49
+  - docker
+
+# ⚠⚠⚠ ONLY TEMPORARY HACKS ALLOWED HERE; ALL ENTRIES NEED TRACKER LINKS ⚠⚠⚠
+# See also the version of this in fedora-coreos-base.yaml
+postprocess:
+  # Disable Zincati and fedora-coreos-pinger on non-release builds
+  # https://github.com/coreos/fedora-coreos-tracker/issues/212
+  - |
+    #!/usr/bin/env bash
+    set -xeuo pipefail
+    source /etc/os-release
+    if [[ $OSTREE_VERSION = *.dev* ]]; then
+      mkdir -p /etc/fedora-coreos-pinger/config.d /etc/zincati/config.d
+      echo -e '# https://github.com/coreos/fedora-coreos-tracker/issues/212\nreporting.enabled = false' > /etc/fedora-coreos-pinger/config.d/95-disable-on-dev.toml
+      echo -e '# https://github.com/coreos/fedora-coreos-tracker/issues/212\nupdates.enabled = false' > /etc/zincati/config.d/95-disable-on-dev.toml
+    fi
+  # Users shouldn't be configuring `rpm-ostreed.conf`
+  # https://github.com/coreos/fedora-coreos-tracker/issues/271
+  - |
+    #!/usr/bin/env bash
+    set -xeuo pipefail
+    cat > /tmp/rpm-ostreed.conf << 'EOF'
+    # By default, this system has its OS updates managed by
+    # `zincati.service`.  Changes made to this file may
+    # conflict with the configuation of `zincati.service`.
+    # See https://github.com/coreos/zincati for additional
+    # information.
+
+    EOF
+    cat /usr/etc/rpm-ostreed.conf >> /tmp/rpm-ostreed.conf
+    cp /tmp/rpm-ostreed.conf /usr/etc/rpm-ostreed.conf
+    rm /tmp/rpm-ostreed.conf
+
+
+remove-from-packages:
+  # Drop NetworkManager support for ifcfg files, see also corresponding
+  # overlay.d/14NetworkManager-plugins
+  - [NetworkManager, /usr/lib64/NetworkManager/.*/libnm-settings-plugin-ifcfg-rh.so]
+
+remove-files:
+  # We don't ship man(1) or info(1)
+  - usr/share/info
+  - usr/share/man
+  # Drop text docs too
+  - usr/share/doc
+
+# Things we don't expect to ship on the host.  We currently
+# have recommends: false so these could only come in via
+# hard requirement, in which case the build will fail.
+exclude-packages:
+  - python
+  - python2
+  - python2-libs
+# - python3
+# - python3-libs
+  - perl
+  - nodejs
+  - dnf
+  - grubby
+  - cowsay  # Just in case
+  # Let's make sure initscripts doesn't get pulled back in
+  # https://github.com/coreos/fedora-coreos-tracker/issues/220#issuecomment-611566254
+  - initscripts
+  # For (datacenter/cloud oriented) servers, we want to see the details by default.
+  # https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/thread/HSMISZ3ETWQ4ETVLWZQJ55ARZT27AAV3/
+  - plymouth

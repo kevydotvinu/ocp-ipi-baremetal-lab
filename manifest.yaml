@@ -1,0 +1,20 @@
+variables:
+  stream: stable
+  prod: false
+
+releasever: 36
+
+ref: oibl/${basearch}/coreos/${stream}
+include: manifests/fedora-coreos.yaml
+
+packages:
+  - libvirt
+  - qemu-kvm
+  - libvirt-daemon
+  - virt-install
+  - ipmitool
+  - make
+
+repos:
+  - fedora
+  - fedora-updates

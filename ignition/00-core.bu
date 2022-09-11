@@ -16,13 +16,14 @@ passwd:
         - wheel
         - adm
         - systemd-journal
+        - libvirtd
       password_hash: $y$j9T$rVVNGAWx1YhOFEOQQdk5v1$CXiP2XQROTh/5e4ZB66WaYafvNkfO/ZqVjaXYwx5Fo2
 systemd:
   units:
     - name: systemd-resolved.service
       enabled: false
       mask: true
-    - name: libvirtd-tcp.socket
+    - name: libvirtd.service
       enabled: true
     - name: host-configure.service
       enabled: true
@@ -42,9 +43,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd-tcp.socket
-        After=libvirtd-tcp.socket
-        Requires=libvirtd-tcp.socket
+        Wants=libvirtd.service
+        After=libvirtd.service
+        Requires=libvirtd.service
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master0.done
 
         [Service]
@@ -60,9 +61,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd-tcp.socket
-        After=libvirtd-tcp.socket
-        Requires=libvirtd-tcp.socket
+        Wants=libvirtd.service
+        After=libvirtd.service
+        Requires=libvirtd.service
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master1.done
 
         [Service]
@@ -78,9 +79,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd-tcp.socket
-        After=libvirtd-tcp.socket
-        Requires=libvirtd-tcp.socket
+        Wants=libvirtd.service
+        After=libvirtd.service
+        Requires=libvirtd.service
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master2.done
 
         [Service]
@@ -96,9 +97,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd-tcp.socket
-        After=libvirtd-tcp.socket
-        Requires=libvirtd-tcp.socket
+        Wants=libvirtd.service
+        After=libvirtd.service
+        Requires=libvirtd.service
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker0.done
 
         [Service]
@@ -114,9 +115,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd-tcp.socket
-        After=libvirtd-tcp.socket
-        Requires=libvirtd-tcp.socket
+        Wants=libvirtd.service
+        After=libvirtd.service
+        Requires=libvirtd.service
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker1.done
 
         [Service]
@@ -175,7 +176,7 @@ systemd:
         TimeoutStopSec=70
         TimeoutStartSec=600
         ExecStartPre=/usr/bin/rm -f %t/%n.ctr-id
-        ExecStartPre=/usr/bin/podman build /opt/ocp-ipi-baremetal-lab/vbmc --net host -t localhost/vbmc
+        ExecStartPre=/usr/bin/rm -vf /opt/ocp-ipi-baremetal-lab/vbmc/master.pid
         ExecStart=/usr/bin/podman run \
                 --cidfile=%t/%n.ctr-id \
                 --cgroups=no-conmon \
@@ -186,7 +187,9 @@ systemd:
                 -ti \
                 --name vbmc \
                 --net host \
-                localhost/vbmc
+                --volume "/opt/ocp-ipi-baremetal-lab/vbmc/config:/root/.vbmc" \
+                --volume "/opt/ocp-ipi-baremetal-lab/vbmc/ssh:/root/.ssh" \
+                quay.io/metal3-io/vbmc
         ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
         ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
         Type=notify
@@ -250,31 +253,12 @@ storage:
       group:
         name: kni
   files:
-    - path: /opt/ocp-ipi-baremetal-lab/vbmc/Dockerfile
+    - path: /opt/ocp-ipi-baremetal-lab/vbmc/ssh/config
       mode: 0644
       overwrite: true
       contents:
         inline: |
-          FROM fedora
-          MAINTAINER "Vinu K" <vkochuku@redhat.com>
-          ADD run.sh /run.sh
-          ADD .vbmc /home/vbmc/.vbmc
-          RUN yum install -y procps python3-pip libvirt-devel python3-devel gcc && \
-              yum clean all && \
-              rm -rf /var/cache/yum && \
-              useradd -u 1001 -m -d /home/vbmc -s /bin/bash vbmc && \
-              chown vbmc:vbmc -R /home/vbmc
-          USER vbmc
-          RUN pip3 install --user virtualbmc
-          ENTRYPOINT ["bash", "-c", "/run.sh"]
-    - path: /opt/ocp-ipi-baremetal-lab/vbmc/run.sh
-      mode: 0755
-      overwrite: true
-      contents:
-        inline: |
-          set -x
-          rm -fv /home/vbmc/.vbmc/master.pid
-          /home/vbmc/.local/bin/vbmcd --foreground
+          StrictHostKeyChecking no
     - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master0/config
       mode: 0644
       user:
@@ -290,7 +274,7 @@ storage:
           address = 192.168.123.1
           port = 6230
           domain_name = master0
-          libvirt_uri = qemu+tcp://localhost/system
+          libvirt_uri = qemu+ssh://kni@192.168.123.1/system
           active = True
     - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master1/config
       mode: 0644
@@ -307,7 +291,7 @@ storage:
           address = 192.168.123.1
           port = 6231
           domain_name = master1
-          libvirt_uri = qemu+tcp://localhost/system
+          libvirt_uri = qemu+ssh://kni@192.168.123.1/system
           active = True
     - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master2/config
       mode: 0644
@@ -324,7 +308,7 @@ storage:
           address = 192.168.123.1
           port = 6232
           domain_name = master2
-          libvirt_uri = qemu+tcp://localhost/system
+          libvirt_uri = qemu+ssh://kni@192.168.123.1/system
           active = True
     - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker0/config
       mode: 0644
@@ -341,7 +325,7 @@ storage:
           address = 192.168.123.1
           port = 6233
           domain_name = worker0
-          libvirt_uri = qemu+tcp://localhost/system
+          libvirt_uri = qemu+ssh://kni@192.168.123.1/system
           active = True
     - path: /opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker1/config
       mode: 0644
@@ -358,7 +342,7 @@ storage:
           address = 192.168.123.1
           port = 6234
           domain_name = worker1
-          libvirt_uri = qemu+tcp://localhost/system
+          libvirt_uri = qemu+ssh://kni@192.168.123.1/system
           active = True
     - path: /etc/resolv.conf
       mode: 0644
@@ -371,22 +355,23 @@ storage:
       contents:
         inline: |
           kni ALL=(ALL) NOPASSWD: ALL
-    - path: /etc/libvirt/libvirtd.conf
+    - path: /etc/polkit-1/localauthority/50-local.d/50-libvirt-remote-access.pkla
       mode: 0644
       overwrite: true
       contents:
         inline: |
-          listen_tls = 0
-          listen_tcp = 1
-          tcp_port = "16509"
-          tls_port = "16514"
-          auth_tcp = "none"
+          [Remote libvirt SSH access]
+          Identity=unix-group:libvirtd
+          Action=org.libvirt.unix.manage
+          ResultAny=yes
+          ResultInactive=yes
+          ResultActive=yes
     - path: /etc/libvirt/libvirt.conf
       mode: 0644
       overwrite: true
       contents:
         inline: |
-          uri_default = "qemu+tcp://localhost/system"
+          uri_default = "qemu:///system"
     - path: /etc/sysctl.d/99-sysctl.conf
       mode: 0644
       overwrite: true
@@ -406,8 +391,9 @@ storage:
           #!/bin/sh
           /usr/sbin/iptables -t nat -I POSTROUTING -s 192.168.123.0/24 ! -d 192.168.123.0/24 -j MASQUERADE
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 443 -j DNAT --to-destination 192.168.123.89:443
-          /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 6443 -j DNAT --to-destination 192.168.123.89:6443
-          systemctl start libvirtd-tcp.socket
+          /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 80 -j DNAT --to-destination 192.168.123.89:80
+          /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 6443 -j DNAT --to-destination 192.168.123.88:6443
+          ssh-keygen -N '' -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa && mkdir -p /home/kni/.ssh && cp /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa.pub /home/kni/.ssh/authorized_keys && chown kni:kni -R /home/kni/.ssh
     - path: /etc/NetworkManager/system-connections/ens3.nmconnection
       mode: 0600
       overwrite: true
@@ -594,7 +580,7 @@ storage:
           
           if virsh list | grep $VM_NAME 2>&1>/dev/null; then virsh destroy $VM_NAME 2>/dev/null; virsh undefine $VM_NAME 2>/dev/null; fi
           if virsh list --all | grep $VM_NAME 2>&1>/dev/null; then virsh undefine $VM_NAME 2>/dev/null; fi
-          if [ ! -f $VM_DISK ] ; then mkdir -p $VM_DIR/$VM_NAME; qemu-img create $VM_DISK 60G; fi
+          if [ ! -f $VM_DISK ] ; then mkdir -p $VM_DIR/$VM_NAME; qemu-img create $VM_DISK 120G; fi
           
           virsh define <(virt-install --name $VM_NAME \
                   --os-variant fedora-coreos-stable \
@@ -654,8 +640,9 @@ storage:
           RELEASE ?= stable-4.10
           LOGLEVEL ?= info
           SCRIPT_DIR = $(shell cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )
-          CONTAINERS = $(shell sudo podman ps --format {{.Names}} | sort | xargs)
+          CONTAINERS = $(shell sudo podman ps --format {{.Names}} | sort | grep -oE 'dhcp|vbmc|webserver' | xargs)
           VMS = $(shell sudo virsh list --all --name | head -n -1 | wc -l)
+          TFF = $(shell ls /tmp/openshift-install-bootstrap-*/terraform.platform.auto.tfvars.json 2>/dev/null | wc -l)
           
           check-env:
           ifndef OCM_TOKEN
@@ -670,6 +657,11 @@ storage:
           check-vms:
           ifneq ($(VMS),5)
                 $(error The VMs are not ready. Please restart the services with 'sudo systemctl restart master0 master1 master2 worker0 worker1' and retry)
+          endif
+
+          check-terraform-file:
+          ifneq ($(TFF),1)
+                $(error The terraform.platform.auto.tfvars.json file is not present in /tmp)
           endif
           
           .PHONY: ssh-pullsecret
@@ -725,6 +717,14 @@ storage:
                 -@for i in master0 master1 master2; do sudo virsh destroy $$i; done
                 @echo "!!! IGNORE THE ERRORS !!!"
 
+          .PHONY: ironic-client
+
+          ironic-client: check-terraform-file
+                @echo "Creating clouds.yaml file ..."
+                -@jq -jr '"clouds:","\n","  metal3:","\n","    auth_type: http_basic","\n","    username: ",.ironic_username,"\n","    password: ",.ironic_password,"\n","    baremetal_endpoint_override: ",.ironic_uri,"\n","    baremetal_introspection_endpoint_override: ",.inspector_uri,"\n"' /tmp/openshift-*/terraform.platform.auto.tfvars.json > /home/kni/ocp-ipi-baremetal-lab/clouds.yaml
+                @echo "Starting ironic-client container ..."
+                -@sudo podman run -ti --rm --entrypoint /bin/bash --net host -v /home/kni/ocp-ipi-baremetal-lab/clouds.yaml:/clouds.yaml -e OS_CLOUD=metal3 quay.io/metal3-io/ironic-client:latest
+
           .PHONY: help
 
           help:
@@ -736,6 +736,7 @@ storage:
                 @echo "  cluster                                Create an OpenShift cluster."
                 @echo "  destroy                                Destroy installed cluster."
                 @echo "  clean                                  Clean old cluster resources."
+                @echo "  ironic-client                          Create ironic-client container."
                 @echo ""
                 @echo "Example:"
                 @echo "  oibl cluster LOGLEVEL=debug"
@@ -876,7 +877,7 @@ storage:
               baremetal: {}
           platform:
             baremetal:
-              libvirtURI: qemu+tcp://localhost/system
+              libvirtURI: qemu:///system
               bootstrapOSImage: ${BOOTSTRAP_OS_IMAGE}
               apiVIP: 192.168.123.88
               ingressVIP: 192.168.123.89

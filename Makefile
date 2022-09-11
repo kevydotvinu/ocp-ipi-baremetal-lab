@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 DIR=$(shell pwd)
 IGNITION_DIR=${DIR}/ignition
-OSTREE_IMAGE?=docker.io/kevydotvinu/oibl-ostree
+OSTREE_IMAGE?=docker.io/kevydotvinu/oibl-ostree:develop
 
 .PHONY: generate-ignition
 

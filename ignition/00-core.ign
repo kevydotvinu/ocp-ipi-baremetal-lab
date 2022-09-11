@@ -72,7 +72,7 @@
           "id": 1001
         },
         "overwrite": true,
-        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master0/config",
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/config/master0/config",
         "user": {
           "id": 1001
         },
@@ -86,7 +86,7 @@
           "id": 1001
         },
         "overwrite": true,
-        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master1/config",
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/config/master1/config",
         "user": {
           "id": 1001
         },
@@ -100,7 +100,7 @@
           "id": 1001
         },
         "overwrite": true,
-        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/master2/config",
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/config/master2/config",
         "user": {
           "id": 1001
         },
@@ -114,7 +114,7 @@
           "id": 1001
         },
         "overwrite": true,
-        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker0/config",
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/config/worker0/config",
         "user": {
           "id": 1001
         },
@@ -128,7 +128,7 @@
           "id": 1001
         },
         "overwrite": true,
-        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/.vbmc/worker1/config",
+        "path": "/opt/ocp-ipi-baremetal-lab/vbmc/config/worker1/config",
         "user": {
           "id": 1001
         },
@@ -487,7 +487,7 @@
         "name": "webserver.service"
       },
       {
-        "contents": "[Unit]\nDescription=Podman container-e6d443b2ffab510db1684ca2833592e6f6de26cdb58a625eb0bb739e2e0b3be9.service\nDocumentation=man:podman-generate-systemd(1)\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStopSec=70\nTimeoutStartSec=600\nExecStartPre=/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/rm -vf /opt/ocp-ipi-baremetal-lab/vbmc/master.pid\nExecStart=/usr/bin/podman run \\\n        --cidfile=%t/%n.ctr-id \\\n        --cgroups=no-conmon \\\n        --rm \\\n        --sdnotify=conmon \\\n        --replace \\\n        -d \\\n        -ti \\\n        --name vbmc \\\n        --net host \\\n        --volume \"/opt/ocp-ipi-baremetal-lab/vbmc/config:/root/.vbmc\" \\\n        --volume \"/opt/ocp-ipi-baremetal-lab/vbmc/ssh:/root/.ssh\" \\\n        quay.io/metal3-io/vbmc\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "contents": "[Unit]\nDescription=vbmc for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStopSec=70\nTimeoutStartSec=600\nExecStartPre=/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/rm -vf /opt/ocp-ipi-baremetal-lab/vbmc/master.pid\nExecStart=/usr/bin/podman run \\\n        --cidfile=%t/%n.ctr-id \\\n        --cgroups=no-conmon \\\n        --rm \\\n        --sdnotify=conmon \\\n        --replace \\\n        -d \\\n        -ti \\\n        --name vbmc \\\n        --net host \\\n        --volume \"/opt/ocp-ipi-baremetal-lab/vbmc/config:/root/.vbmc\" \\\n        --volume \"/opt/ocp-ipi-baremetal-lab/vbmc/ssh:/root/.ssh\" \\\n        quay.io/metal3-io/vbmc\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
         "enabled": true,
         "name": "vbmc.service"
       },

@@ -2,6 +2,7 @@ SHELL=/bin/bash
 DIR=$(shell pwd)
 IGNITION_DIR=${DIR}/ignition
 OSTREE_IMAGE?=docker.io/kevydotvinu/oibl-ostree:develop
+REGISTRY=$(shell echo ${OSTREE_IMAGE} | cut -d/ -f1)
 
 .PHONY: generate-ignition
 
@@ -35,7 +36,7 @@ push-ostree:
 	@echo -e "\e[0;33m" >&2
 	@echo "Pushing ostree container image ..."
 	@echo -e "\e[0m" >&2
-	source ${DIR}/env && pushd ../cosa && COREOS_ASSEMBLER_CONFIG_GIT=${DIR} && cosa push-container --authfile /srv/src/config/auth.json --format oci --base-image-name docker.io/kevydotvinu/oibl-ostree && popd
+	source ${DIR}/env && pushd ../cosa && COREOS_ASSEMBLER_CONFIG_GIT=${DIR} && echo "Logging in ${REGISTRY} ..." && podman login --authfile auth.json ${REGISTRY} && cosa push-container --authfile /srv/src/config/auth.json --format oci ${OSTREE_IMAGE} && popd
 
 .PHONY: build-push-ostree
 

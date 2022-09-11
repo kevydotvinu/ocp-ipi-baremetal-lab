@@ -1,6 +1,8 @@
 variant: fcos
 version: 1.0.0
 passwd:
+  groups:
+    - name: libvirtd
   users:
     - name: core
       gecos: CoreOS Admin

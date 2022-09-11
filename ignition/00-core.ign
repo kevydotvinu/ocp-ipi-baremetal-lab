@@ -3,6 +3,11 @@
     "version": "3.0.0"
   },
   "passwd": {
+    "groups": [
+      {
+        "name": "libvirtd"
+      }
+    ],
     "users": [
       {
         "gecos": "CoreOS Admin",

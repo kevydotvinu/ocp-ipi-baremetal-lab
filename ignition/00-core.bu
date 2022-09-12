@@ -25,7 +25,7 @@ systemd:
     - name: systemd-resolved.service
       enabled: false
       mask: true
-    - name: libvirtd.service
+    - name: libvirtd.socket
       enabled: true
     - name: host-configure.service
       enabled: true
@@ -45,9 +45,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd.service
-        After=libvirtd.service
-        Requires=libvirtd.service
+        Wants=libvirtd.socket
+        After=libvirtd.socket
+        Requires=libvirtd.socket
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master0.done
 
         [Service]
@@ -63,9 +63,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd.service
-        After=libvirtd.service
-        Requires=libvirtd.service
+        Wants=libvirtd.socket
+        After=libvirtd.socket
+        Requires=libvirtd.socket
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master1.done
 
         [Service]
@@ -81,9 +81,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd.service
-        After=libvirtd.service
-        Requires=libvirtd.service
+        Wants=libvirtd.socket
+        After=libvirtd.socket
+        Requires=libvirtd.socket
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/master2.done
 
         [Service]
@@ -99,9 +99,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd.service
-        After=libvirtd.service
-        Requires=libvirtd.service
+        Wants=libvirtd.socket
+        After=libvirtd.socket
+        Requires=libvirtd.socket
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker0.done
 
         [Service]
@@ -117,9 +117,9 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Wants=libvirtd.service
-        After=libvirtd.service
-        Requires=libvirtd.service
+        Wants=libvirtd.socket
+        After=libvirtd.socket
+        Requires=libvirtd.socket
         ConditionPathExists=!/opt/ocp-ipi-baremetal-lab/worker1.done
 
         [Service]
@@ -394,7 +394,8 @@ storage:
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 443 -j DNAT --to-destination 192.168.123.89:443
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 80 -j DNAT --to-destination 192.168.123.89:80
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 6443 -j DNAT --to-destination 192.168.123.88:6443
-          ssh-keygen -N '' -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa && mkdir -p /home/kni/.ssh && cp /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa.pub /home/kni/.ssh/authorized_keys && chown kni:kni -R /home/kni/.ssh
+          test -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa || (ssh-keygen -N '' -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa && mkdir -p /home/kni/.ssh && cp /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa.pub /home/kni/.ssh/authorized_keys && chown kni:kni -R /home/kni/.ssh)
+          test -f /opt/ocp-ipi-baremetal-lab/cockpit-ws.done || (test -d /usr/share/cockpit && podman container runlabel --name cockpit-ws RUN docker.io/cockpit/ws && podman container runlabel INSTALL docker.io/cockpit/ws && systemctl enable cockpit.service && touch /opt/ocp-ipi-baremetal-lab/cockpit-ws.done)
     - path: /etc/NetworkManager/system-connections/ens3.nmconnection
       mode: 0600
       overwrite: true

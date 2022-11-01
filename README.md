@@ -52,7 +52,7 @@ end
 ### Install and configure provisioner node
 ```bash
 $ echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
-$ coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition
+$ sudo coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition
 $ sudo systemctl reboot
 $ ssh kni@<IP> (Enter `Kni@123` as password)
 $ sudo rpm-ostree rebase --experimental \

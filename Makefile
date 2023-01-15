@@ -3,7 +3,7 @@ DIR=$(shell pwd)
 ORANGE=\e[0;33m
 NOCOLOR=\e[0m
 IGNITION_DIR=${DIR}/ignition
-OSTREE_IMAGE?=docker.io/kevydotvinu/oibl-ostree:develop
+OSTREE_IMAGE?=quay.io/oibl/oibl:develop
 REGISTRY=$(shell echo ${OSTREE_IMAGE} | cut -d/ -f1)
 RELEASEVER=$(shell curl -s https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/manifest.yaml | grep releasever:)
 

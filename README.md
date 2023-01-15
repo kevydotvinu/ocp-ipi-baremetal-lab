@@ -1,7 +1,7 @@
 # OpenShift IPI Baremetal Lab (oibl)
 ![GitHub](https://img.shields.io/github/license/kevydotvinu/ocp-ipi-baremetal-lab)
-![Docker Pulls](https://img.shields.io/docker/pulls/kevydotvinu/oibl-ostree?label=ostree%20pulls)
-![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/kevydotvinu/oibl-ostree?color=red&label=ostree%20size)
+![Docker Pulls](https://img.shields.io/quay/pulls/oibl/oibl?label=ostree%20pulls)
+![Docker Image Size (latest by date)](https://img.shields.io/quay/image-size/oibl/oibl?color=red&label=ostree%20size)
 ![GitHub issues](https://img.shields.io/github/issues/kevydotvinu/ocp-ipi-baremetal-lab)
 
 A lab environment that can be used for studying the OpenShift bare metal IPI deployment and its internal parts. It also fulfils the need for creating an OpenShift cluster with minimal intervention and time.
@@ -52,11 +52,11 @@ end
 ### Install and configure provisioner node
 ```bash
 $ echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
-$ coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition
+$ coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition-develop
 $ sudo systemctl reboot
 $ ssh kni@<IP> (Enter `Kni@123` as password)
 $ sudo rpm-ostree rebase --experimental \
-       ostree-unverified-registry:docker.io/kevydotvinu/oibl-ostree
+       ostree-unverified-registry:quay.io/oibl/oibl:develop
 $ sudo rpm-ostree kargs --append=selinux=0 --reboot
 ```
 
@@ -79,7 +79,7 @@ You can start the OpenShift baremetal IPI installation now.
 ```bash
 $ oibl help
 $ oibl ssh-pullsecret OCM_TOKEN=<token from https://cloud.redhat.com/openshift/token>
-$ oibl install-config RELEASE=stable-4.10
+$ oibl install-config RELEASE=stable-4.11
 $ oibl cluster LOGLEVEL=info
 ```
 
@@ -117,18 +117,6 @@ $ ssh core@<fcos-ip>
 ```
 
 ## Known issues
-### Docker rate limit
-**Error**
-```bash
-error: remote error: reading manifest latest in docker.io/kevydotvinu/oibl-ostree: \
-toomanyrequests: You have reached your pull rate limit. You may increase the limit \
-by authenticating and upgrading: https://www.docker.com/increase-rate-limit
-```
-**Workaround**
-```bash
-sudo podman login docker.io
-```
-
 ### The containerized services are not ready
 **Error**
 ```bash

@@ -25,7 +25,7 @@ generate-ignition:
 
 update-repo:
 	@echo -e "${ORANGE}Updating submodule ...${NOCOLOR}"
-	git submodule update --remote --merge
+	git submodule update --remote
 	@echo -e "${ORANGE}Removing linked & copied files ...${NOCOLOR}"
 	rm -rvf manifest-lock* \
 		fedora.repo \

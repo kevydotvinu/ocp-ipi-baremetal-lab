@@ -16,7 +16,7 @@ include: fedora-coreos-base.yaml
 conditional-include:
   - if: prod == false
     # long-term, would be good to support specifying a nested TreeComposeConfig
-    include: disable-zincati-and-pinger.yaml
+    include: disable-zincati.yaml
   - if: basearch == "aarch64"
     # Fixup for kdump on aarch64 AWS instances
     include: kdump-aarch64-aws-workaround.yaml
@@ -47,8 +47,6 @@ packages:
   - moby-engine
   # Already pulled in by moby-engine, but let's be explicit. Typhoon uses it.
   - containerd
-  # User metrics
-  - fedora-coreos-pinger
   # Updates
   - zincati
   # Include and set the default editor
@@ -64,15 +62,14 @@ etc-group-members:
 # ⚠⚠⚠ ONLY TEMPORARY HACKS ALLOWED HERE; ALL ENTRIES NEED TRACKER LINKS ⚠⚠⚠
 # See also the version of this in fedora-coreos-base.yaml
 postprocess:
-  # Disable Zincati and fedora-coreos-pinger on non-release builds
+  # Disable Zincati on non-release builds
   # https://github.com/coreos/fedora-coreos-tracker/issues/212
   - |
     #!/usr/bin/env bash
-    set -xeuo pipefail
+    set -euxo pipefail
     source /etc/os-release
     if [[ $OSTREE_VERSION = *.dev* ]]; then
-      mkdir -p /etc/fedora-coreos-pinger/config.d /etc/zincati/config.d
-      echo -e '# https://github.com/coreos/fedora-coreos-tracker/issues/212\nreporting.enabled = false' > /etc/fedora-coreos-pinger/config.d/95-disable-on-dev.toml
+      mkdir -p /etc/zincati/config.d
       echo -e '# https://github.com/coreos/fedora-coreos-tracker/issues/212\nupdates.enabled = false' > /etc/zincati/config.d/95-disable-on-dev.toml
     fi
   # Users shouldn't be configuring `rpm-ostreed.conf`
@@ -91,12 +88,53 @@ postprocess:
     cat /usr/etc/rpm-ostreed.conf >> /tmp/rpm-ostreed.conf
     cp /tmp/rpm-ostreed.conf /usr/etc/rpm-ostreed.conf
     rm /tmp/rpm-ostreed.conf
+  # Make sure that we do not ship broken symlinks:
+  # https://github.com/coreos/fedora-coreos-config/issues/1782
+  # Remove known broken symlinks that point to non-existing files or directories:
+  # - Remove `.build-id` for binaries that we remove in other parts of the FCOS manifest
+  # - Remove links to man pages that we remove in FCOS
+  # Man pages are removed in FCOS thus the links in alternatives pointing to those are left there broken.
+  # Docs removal comes from manifests/fedora-coreos.yaml
+  # - systemd-firstboot comes from manifests/ignition-and-ostree.yaml
+  # - systemd-gpt-auto-generator comes from ignition-and-ostree.yaml
+  - |
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    list_broken_symlinks_folders=(
+      '/etc/alternatives/'
+      '/usr/lib/.build-id/'
+    )
+
+    # It is not possible to remove files from usr after first boot so that is
+    # why we are removing them in the postprocess scripts here.
+    # The .build-id links are pointing to binaries that we remove in other parts of the FCOS manifest.
+    list_known_removed_folders=(
+      '/usr/bin/systemd-firstboot'
+      '/usr/lib/systemd/system-generators/systemd-gpt-auto-generator'
+      '/usr/share/doc/'
+      '/usr/share/info/'
+      '/usr/share/man/'
+      )
+    for folder in "${list_broken_symlinks_folders[@]}"; do
+        find "${folder}" -type l | while read -r file_name; do
+            real_path=$(realpath -m "${file_name}");
+            if [[ -e "${real_path}" ]]; then
+              continue
+            fi
+            for element in "${list_known_removed_folders[@]}"; do
+              if [[ "${real_path}" == "${element}"* ]]; then
+                  rm -r "${file_name}"
+              fi
+            done
+        done
+    done
 
 
 remove-from-packages:
-  # Drop NetworkManager support for ifcfg files, see also corresponding
-  # overlay.d/14NetworkManager-plugins
-  - [NetworkManager, /usr/lib64/NetworkManager/.*/libnm-settings-plugin-ifcfg-rh.so]
+  # Drop some buggy sysusers fragments which do not match static IDs allocation:
+  # https://bugzilla.redhat.com/show_bug.cgi?id=2105177
+  - [dbus-common, /usr/lib/sysusers.d/dbus.conf]
 
 remove-files:
   # We don't ship man(1) or info(1)
@@ -112,9 +150,10 @@ exclude-packages:
   - python
   - python2
   - python2-libs
-# - python3
-# - python3-libs
+#  - python3
+#  - python3-libs
   - perl
+  - perl-interpreter
   - nodejs
   - dnf
   - grubby
@@ -125,3 +164,6 @@ exclude-packages:
   # For (datacenter/cloud oriented) servers, we want to see the details by default.
   # https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/thread/HSMISZ3ETWQ4ETVLWZQJ55ARZT27AAV3/
   - plymouth
+  # Do not use legacy ifcfg config format in NetworkManager
+  # See https://github.com/coreos/fedora-coreos-config/pull/1991
+  - NetworkManager-initscripts-ifcfg-rh

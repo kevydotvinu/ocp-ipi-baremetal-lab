@@ -2,18 +2,22 @@ variables:
   stream: stable
   prod: false
 
-releasever: 36
+releasever: 37
 
 ref: oibl/${basearch}/coreos/${stream}
 include: manifests/fedora-coreos.yaml
 
 packages:
-  - libvirt
   - qemu-kvm
   - libvirt-daemon
   - virt-install
   - ipmitool
   - make
+  - cockpit-ostree
+  - cockpit-podman
+  - cockpit-machines
+  - cockpit-storaged
+  - cockpit-networkmanager
 
 repos:
   - fedora

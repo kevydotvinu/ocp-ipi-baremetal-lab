@@ -7,6 +7,14 @@ OSTREE_IMAGE?=quay.io/oibl/oibl:develop
 REGISTRY=$(shell echo ${OSTREE_IMAGE} | cut -d/ -f1)
 RELEASEVER=$(shell curl -s https://raw.githubusercontent.com/coreos/fedora-coreos-config/testing-devel/manifest.yaml | grep releasever:)
 
+check-regcred:
+ifndef REGUSER
+	$(error REGUSER is undefined)
+endif
+ifndef REGPASS
+	$(error REGPASS is undefined)
+endif
+
 .PHONY: generate-ignition
 
 generate-ignition:
@@ -80,16 +88,16 @@ build-ostree:
 
 .PHONY: push-ostree
 
-push-ostree:
+push-ostree: check-regcred
 	@echo -e "${ORANGE}Pushing ostree container image ...${NOCOLOR}"
 	source ${DIR}/env && \
 		pushd ../cosa && \
 		COREOS_ASSEMBLER_CONFIG_GIT=${DIR} && \
 		echo "Logging in ${REGISTRY} ..." && \
-		podman login --authfile auth.json ${REGISTRY} && \
+		podman login --authfile auth.json --username=${REGUSER} --password=${REGPASS} ${REGISTRY} && \
 		cosa push-container --authfile auth.json --format oci ${OSTREE_IMAGE} && \
 		popd
 
 .PHONY: build-push-ostree
 
-build-push-ostree: cosa-init build-ostree push-ostree
+build-push-ostree: check-regcred update-repo cosa-init build-ostree push-ostree

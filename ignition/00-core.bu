@@ -177,7 +177,7 @@ systemd:
         TimeoutStopSec=70
         TimeoutStartSec=600
         ExecStartPre=/usr/bin/rm -f %t/%n.ctr-id
-        ExecStartPre=/usr/bin/rm -vf /opt/ocp-ipi-baremetal-lab/vbmc/master.pid
+        ExecStartPre=/usr/bin/rm -vf /opt/ocp-ipi-baremetal-lab/vbmc/config/master.pid
         ExecStart=/usr/bin/podman run \
                 --cidfile=%t/%n.ctr-id \
                 --cgroups=no-conmon \
@@ -395,7 +395,7 @@ storage:
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 80 -j DNAT --to-destination 192.168.123.89:80
           /usr/sbin/iptables -t nat -I PREROUTING -p tcp -i $(/usr/sbin/ip r | grep default | awk '{print $5}') --dport 6443 -j DNAT --to-destination 192.168.123.88:6443
           test -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa || (ssh-keygen -N '' -f /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa && mkdir -p /home/kni/.ssh && cp /opt/ocp-ipi-baremetal-lab/vbmc/ssh/id_rsa.pub /home/kni/.ssh/authorized_keys && chown kni:kni -R /home/kni/.ssh)
-          test -f /opt/ocp-ipi-baremetal-lab/cockpit-ws.done || (test -d /usr/share/cockpit && podman container runlabel --name cockpit-ws RUN docker.io/cockpit/ws && podman container runlabel INSTALL docker.io/cockpit/ws && systemctl enable cockpit.service && touch /opt/ocp-ipi-baremetal-lab/cockpit-ws.done)
+          test -f /opt/ocp-ipi-baremetal-lab/cockpit-ws.done || (test -d /usr/share/cockpit && podman container runlabel --name cockpit-ws RUN quay.io/cockpit/ws && podman container runlabel INSTALL quay.io/cockpit/ws && systemctl enable cockpit.service && touch /opt/ocp-ipi-baremetal-lab/cockpit-ws.done)
     - path: /etc/NetworkManager/system-connections/ens3.nmconnection
       mode: 0600
       overwrite: true

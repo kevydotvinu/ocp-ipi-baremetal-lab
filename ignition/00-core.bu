@@ -920,7 +920,7 @@ storage:
           EOF
           echo "✔ Generated!"
           mkdir -p ${SCRIPT_DIR}/clusterconfigs
-          echo "Copying install-config.yaml file to clusterconfigs direcotory ..."
+          echo "Copying install-config.yaml file to clusterconfigs directory ..."
           cp ${SCRIPT_DIR}/install-config.yaml ${SCRIPT_DIR}/clusterconfigs/
           echo "✔ Copied!"
     - path: /opt/ocp-ipi-baremetal-lab/host/broadcast.sh

@@ -1,7 +1,5 @@
 # OpenShift IPI Baremetal Lab (oibl)
 ![GitHub](https://img.shields.io/github/license/kevydotvinu/ocp-ipi-baremetal-lab)
-![Docker Pulls](https://img.shields.io/quay/pulls/oibl/oibl?label=ostree%20pulls)
-![Docker Image Size (latest by date)](https://img.shields.io/quay/image-size/oibl/oibl?color=red&label=ostree%20size)
 ![GitHub issues](https://img.shields.io/github/issues/kevydotvinu/ocp-ipi-baremetal-lab)
 
 A lab environment that can be used for studying the OpenShift bare metal IPI deployment and its internal parts. It also fulfils the need for creating an OpenShift cluster with minimal intervention and time.
@@ -52,7 +50,7 @@ end
 ### Install and configure provisioner node
 ```bash
 $ echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/disable_ipv6
-$ coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition-develop
+$ sudo coreos-installer install /dev/sda --ignition-url=https://bit.ly/oibl-ignition-develop
 $ sudo systemctl reboot
 $ ssh kni@<IP> (Enter `Kni@123` as password)
 $ sudo rpm-ostree rebase --experimental \

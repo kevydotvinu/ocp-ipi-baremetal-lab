@@ -437,6 +437,34 @@
           "source": "data:,apiVersion%3A%20v1%0Akind%3A%20Secret%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-1-bmc-secret%0A%20%20namespace%3A%20openshift-machine-api%0Atype%3A%20Opaque%0Adata%3A%0A%20%20username%3A%20YWRtaW4K%0A%20%20password%3A%20cGFzc3dvcmQK%0A---%0AapiVersion%3A%20metal3.io%2Fv1alpha1%0Akind%3A%20BareMetalHost%0Ametadata%3A%0A%20%20name%3A%20openshift-worker-1%0A%20%20namespace%3A%20openshift-machine-api%0Aspec%3A%0A%20%20online%3A%20true%0A%20%20bootMACAddress%3A%2052%3A54%3A00%3A11%3A22%3Ab5%0A%20%20bmc%3A%0A%20%20%20%20address%3A%20ipmi%3A%2F%2F192.168.123.1%3A6234%0A%20%20%20%20credentialsName%3A%20openshift-worker-1-bmc-secret%0A%20%20rootDeviceHints%3A%0A%20%20%20%20deviceName%3A%20%22%2Fdev%2Fvda%22%0A"
         },
         "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/99_openshift-machineconfig_99-master-oibl.bu",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,variant%3A%20openshift%0Aversion%3A%204.x.x%0Ametadata%3A%0A%20%20labels%3A%0A%20%20%20%20machineconfiguration.openshift.io%2Frole%3A%20master%0A%20%20name%3A%2099-master-oibl%0Astorage%3A%0A%20%20files%3A%0A%20%20-%20path%3A%20%2Fetc%2Fssh%2Fsshd_config.d%2F99-oibl.conf%0A%20%20%20%20mode%3A%200644%0A%20%20%20%20overwrite%3A%20true%0A%20%20%20%20contents%3A%0A%20%20%20%20%20%20inline%3A%20%7C%0A%20%20%20%20%20%20%20%20PasswordAuthentication%20yes%0Asystemd%3A%0A%20%20units%3A%0A%20%20-%20name%3A%20oibl.service%0A%20%20%20%20enabled%3A%20true%0A%20%20%20%20contents%3A%20%7C%0A%20%20%20%20%20%20%5BService%5D%0A%20%20%20%20%20%20Type%3Doneshot%0A%20%20%20%20%20%20ExecStart%3D%2Fusr%2Fbin%2Fsh%20-c%20'%2Fusr%2Fbin%2Fecho%20%22Core%40123%22%20%7C%20%2Fusr%2Fbin%2Fpasswd%20--stdin%20core'%0A%20%20%20%20%20%20RemainAfterExit%3Dyes%0A%20%20%20%20%20%20%5BInstall%5D%0A%20%20%20%20%20%20WantedBy%3Dmulti-user.target%0A"
+        },
+        "mode": 493
+      },
+      {
+        "group": {
+          "name": "kni"
+        },
+        "overwrite": true,
+        "path": "/home/kni/ocp-ipi-baremetal-lab/99_openshift-machineconfig_99-worker-oibl.bu",
+        "user": {
+          "name": "kni"
+        },
+        "contents": {
+          "source": "data:,variant%3A%20openshift%0Aversion%3A%204.x.x%0Ametadata%3A%0A%20%20labels%3A%0A%20%20%20%20machineconfiguration.openshift.io%2Frole%3A%20worker%0A%20%20name%3A%2099-worker-oibl%0Astorage%3A%0A%20%20files%3A%0A%20%20-%20path%3A%20%2Fetc%2Fssh%2Fsshd_config.d%2F99-oibl.conf%0A%20%20%20%20mode%3A%200644%0A%20%20%20%20overwrite%3A%20true%0A%20%20%20%20contents%3A%0A%20%20%20%20%20%20inline%3A%20%7C%0A%20%20%20%20%20%20%20%20PasswordAuthentication%20yes%0Asystemd%3A%0A%20%20units%3A%0A%20%20-%20name%3A%20oibl.service%0A%20%20%20%20enabled%3A%20true%0A%20%20%20%20contents%3A%20%7C%0A%20%20%20%20%20%20%5BService%5D%0A%20%20%20%20%20%20Type%3Doneshot%0A%20%20%20%20%20%20ExecStart%3D%2Fusr%2Fbin%2Fsh%20-c%20'%2Fusr%2Fbin%2Fecho%20%22Core%40123%22%20%7C%20%2Fusr%2Fbin%2Fpasswd%20--stdin%20core'%0A%20%20%20%20%20%20RemainAfterExit%3Dyes%0A%20%20%20%20%20%20%5BInstall%5D%0A%20%20%20%20%20%20WantedBy%3Dmulti-user.target%0A"
+        },
+        "mode": 493
       }
     ]
   },

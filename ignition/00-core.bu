@@ -1001,3 +1001,71 @@ storage:
               credentialsName: openshift-worker-1-bmc-secret
             rootDeviceHints:
               deviceName: "/dev/vda"
+    - path: /home/kni/ocp-ipi-baremetal-lab/99_openshift-machineconfig_99-master-oibl.bu
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          variant: openshift
+          version: 4.x.x
+          metadata:
+            labels:
+              machineconfiguration.openshift.io/role: master
+            name: 99-master-oibl
+          storage:
+            files:
+            - path: /etc/ssh/sshd_config.d/99-oibl.conf
+              mode: 0644
+              overwrite: true
+              contents:
+                inline: |
+                  PasswordAuthentication yes
+          systemd:
+            units:
+            - name: oibl.service
+              enabled: true
+              contents: |
+                [Service]
+                Type=oneshot
+                ExecStart=/usr/bin/sh -c '/usr/bin/echo "Core@123" | /usr/bin/passwd --stdin core'
+                RemainAfterExit=yes
+                [Install]
+                WantedBy=multi-user.target
+    - path: /home/kni/ocp-ipi-baremetal-lab/99_openshift-machineconfig_99-worker-oibl.bu
+      mode: 0755
+      overwrite: true
+      user:
+        name: kni
+      group:
+        name: kni
+      contents:
+        inline: |
+          variant: openshift
+          version: 4.x.x
+          metadata:
+            labels:
+              machineconfiguration.openshift.io/role: worker
+            name: 99-worker-oibl
+          storage:
+            files:
+            - path: /etc/ssh/sshd_config.d/99-oibl.conf
+              mode: 0644
+              overwrite: true
+              contents:
+                inline: |
+                  PasswordAuthentication yes
+          systemd:
+            units:
+            - name: oibl.service
+              enabled: true
+              contents: |
+                [Service]
+                Type=oneshot
+                ExecStart=/usr/bin/sh -c '/usr/bin/echo "Core@123" | /usr/bin/passwd --stdin core'
+                RemainAfterExit=yes
+                [Install]
+                WantedBy=multi-user.target

@@ -38,7 +38,7 @@ end
 |:-:|:-:|:-:|:-:|:-:|
 |Provisioner node|[Fedora CoreOS](https://getfedora.org/en/coreos/download/)|20|80 GB|240 GB|
 
-> Enable nested virtualization if the host is a VM. For example, in Red Hat Virtualization, enable the `Pass-Through Host CPU` CPU option in the Virtual Machine settings (Under the Host section).
+> Enable nested virtualization if the host is a VM. In Red Hat Virtualization, enable the `Pass-Through Host CPU` CPU option in the Virtual Machine settings (Under the Host section). In VMware ESXi, enable `Hardware virtualization` (Expose hardware assisted virtualization to the guest OS). This can be checked using the `virt-host-validate` command from the VM itself. The output of the command should provide `QEMU: Checking for hardware virtualization : PASS`.
 
 > Use the Testing release stream of Fedora CoreOS.
 > ```bash

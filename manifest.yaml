@@ -18,6 +18,8 @@ packages:
   - cockpit-machines
   - cockpit-storaged
   - cockpit-networkmanager
+  - openvswitch
+  - toolbox
 
 repos:
   - fedora

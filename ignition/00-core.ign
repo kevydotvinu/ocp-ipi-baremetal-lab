@@ -339,6 +339,22 @@
         "mode": 420
       },
       {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/pxe/Containerfile",
+        "contents": {
+          "source": "data:,FROM%20fedora%0AMAINTAINER%20%22Vinu%20K%22%20%3Cvkochuku%40redhat.com%3E%0ARUN%20yum%20install%20-y%20dnsmasq%0AADD%20dnsmasq.conf%20%2Fdnsmasq.conf%0AENTRYPOINT%20%5B%22dnsmasq%22%5D%0ACMD%20%5B%22-C%22%2C%20%22%2Fdnsmasq.conf%22%5D%0A"
+        },
+        "mode": 420
+      },
+      {
+        "overwrite": true,
+        "path": "/opt/ocp-ipi-baremetal-lab/pxe/dnsmasq.conf",
+        "contents": {
+          "source": "data:,no-daemon%0Ainterface%3Dprovisioning%0Adhcp-range%3D172.22.0.3%2C172.22.0.253%2C255.255.255.0%0Aexcept-interface%3Dlo%0Abind-interfaces%0Alog-dhcp%0Alog-queries%0Adhcp-authoritative%0Alog-async%0Aenable-tftp%0Adhcp-userclass%3Dset%3Aipxe%2CiPXE%0Adhcp-boot%3Dtag%3Aipxe%2Chttp%3A%2F%2F172.22.0.2%2Fboot.ipxe%0A"
+        },
+        "mode": 420
+      },
+      {
         "group": {
           "name": "kni"
         },
@@ -520,9 +536,14 @@
         "name": "vbmc.service"
       },
       {
-        "contents": "[Unit]\nDescription=Dnsmasq for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStartSec=180\nTimeoutStopSec=70\nExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/podman build --net host --tag localhost/dnsmasq /opt/ocp-ipi-baremetal-lab/dhcp\nExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dnsmasq\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "contents": "[Unit]\nDescription=DHCP for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStartSec=180\nTimeoutStopSec=70\nExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/podman build --net host --tag localhost/dhcp /opt/ocp-ipi-baremetal-lab/dhcp\nExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dhcp\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
         "enabled": true,
         "name": "dhcp.service"
+      },
+      {
+        "contents": "[Unit]\nDescription=PXE for ocp-ipi-baremetal-lab\nWants=network-online.target\nAfter=network-online.target\nRequiresMountsFor=%t/containers\n\n[Service]\nEnvironment=PODMAN_SYSTEMD_UNIT=%n\nRestart=always\nTimeoutStartSec=180\nTimeoutStopSec=70\nExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id\nExecStartPre=/usr/bin/podman build --net host --tag localhost/pxe /opt/ocp-ipi-baremetal-lab/pxe\nExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name pxe -d --net host --cap-add NET_ADMIN,NET_RAW localhost/pxe\nExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id\nExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id\nType=notify\nNotifyAccess=all\n\n[Install]\nWantedBy=default.target\n",
+        "enabled": false,
+        "name": "pxe.service"
       },
       {
         "contents": "[Unit]\nDescription=Check containers status\nAfter=selinux-configure.service\n\n[Service]\nTimeout=0\nType=oneshot\nExecStart=/opt/ocp-ipi-baremetal-lab/host/broadcast.sh\nRemainAfterExit=yes\n\n[Install]\nWantedBy=basic.target\n",

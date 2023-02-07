@@ -202,7 +202,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Dnsmasq for ocp-ipi-baremetal-lab
+        Description=DHCP for ocp-ipi-baremetal-lab
         Wants=network-online.target
         After=network-online.target
         RequiresMountsFor=%t/containers
@@ -213,8 +213,32 @@ systemd:
         TimeoutStartSec=180
         TimeoutStopSec=70
         ExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id
-        ExecStartPre=/usr/bin/podman build --net host --tag localhost/dnsmasq /opt/ocp-ipi-baremetal-lab/dhcp
-        ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dnsmasq
+        ExecStartPre=/usr/bin/podman build --net host --tag localhost/dhcp /opt/ocp-ipi-baremetal-lab/dhcp
+        ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name dhcp -d --net host --cap-add NET_ADMIN,NET_RAW localhost/dhcp
+        ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: pxe.service
+      enabled: false
+      contents: |
+        [Unit]
+        Description=PXE for ocp-ipi-baremetal-lab
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        TimeoutStartSec=180
+        TimeoutStopSec=70
+        ExecStartPre=-/usr/bin/rm -f %t/%n.ctr-id
+        ExecStartPre=/usr/bin/podman build --net host --tag localhost/pxe /opt/ocp-ipi-baremetal-lab/pxe
+        ExecStart=/usr/bin/podman run --cidfile=%t/%n.ctr-id --cgroups=no-conmon --rm --sdnotify=conmon --name pxe -d --net host --cap-add NET_ADMIN,NET_RAW localhost/pxe
         ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
         ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
         Type=notify
@@ -630,6 +654,34 @@ storage:
           dhcp-host=52:54:00:11:22:a3,master2.ocp.example.local,192.168.123.93
           dhcp-host=52:54:00:11:22:a4,worker0.ocp.example.local,192.168.123.94
           dhcp-host=52:54:00:11:22:a5,worker1.ocp.example.local,192.168.123.95
+    - path: /opt/ocp-ipi-baremetal-lab/pxe/Containerfile
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          FROM fedora
+          MAINTAINER "Vinu K" <vkochuku@redhat.com>
+          RUN yum install -y dnsmasq
+          ADD dnsmasq.conf /dnsmasq.conf
+          ENTRYPOINT ["dnsmasq"]
+          CMD ["-C", "/dnsmasq.conf"]
+    - path: /opt/ocp-ipi-baremetal-lab/pxe/dnsmasq.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          no-daemon
+          interface=provisioning
+          dhcp-range=172.22.0.3,172.22.0.253,255.255.255.0
+          except-interface=lo
+          bind-interfaces
+          log-dhcp
+          log-queries
+          dhcp-authoritative
+          log-async
+          enable-tftp
+          dhcp-userclass=set:ipxe,iPXE
+          dhcp-boot=tag:ipxe,http://172.22.0.2/boot.ipxe
     - path: /home/kni/Makefile
       mode: 0755
       overwrite: true

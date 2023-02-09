@@ -34,12 +34,14 @@ update-repo:
 		image-base.yaml \
 		manifests \
 		overlay.d \
-		live
+		live \
+		platforms.yaml
 	@echo -e "${ORANGE}Linking manifest-lock*,image.yaml,image-base.yaml & live ...${NOCOLOR}"
 	ln -svf fedora-coreos-config/manifest-lock* \
 		fedora-coreos-config/image.yaml \
 		fedora-coreos-config/image-base.yaml \
 		fedora-coreos-config/live \
+		fedora-coreos-config/platforms.yaml \
 		.
 	@echo -e "${ORANGE}Copying fedora.repo & fedora-coreos-pool.repo ...${NOCOLOR}"
 	cp -rvf fedora-coreos-config/fedora.repo \
@@ -73,6 +75,18 @@ cosa-init:
 		pushd ../cosa && \
 		unset COREOS_ASSEMBLER_CONFIG_GIT && \
 		cosa init https://github.com/kevydotvinu/ocp-ipi-baremetal-lab && \
+		popd
+
+.PHONY: cosa-run
+
+cosa-run:
+	@echo -e "${ORANGE}Building and running FCOS image ...${NOCOLOR}"
+	source ${DIR}/env && \
+		pushd ../cosa && \
+		COREOS_ASSEMBLER_CONFIG_GIT=${DIR} && \
+		cosa fetch && \
+		cosa build && \
+		cosa run && \
 		popd
 
 .PHONY: build-ostree

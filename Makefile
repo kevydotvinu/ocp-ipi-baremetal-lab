@@ -115,3 +115,40 @@ push-ostree: check-regcred
 .PHONY: build-push-ostree
 
 build-push-ostree: check-regcred update-repo cosa-init build-ostree push-ostree
+
+
+.PHONY: build-iso
+
+build-iso:
+	@echo -e "${ORANGE}Building ISO image ...${NOCOLOR}"
+	source ${DIR}/env && \
+		pushd ../cosa && \
+		COREOS_ASSEMBLER_CONFIG_GIT=${DIR} && \
+		cosa fetch && \
+		cosa build metal && \
+		cosa build metal4k && \
+		cosa buildextend-live && \
+		popd
+
+.PHONY: customize-iso
+
+customize-iso:
+	@echo -e "${ORANGE}Customizing ISO image ...${NOCOLOR}"
+	source ${DIR}/env && \
+		pushd ../ && \
+		podman run \
+			--security-opt label=disable \
+			--pull=always \
+			--rm -v .:/data \
+			--workdir /data \
+			quay.io/coreos/coreos-installer:release iso customize \
+			--force \
+			--dest-ignition ocp-ipi-baremetal-lab/ignition/00-core.ign \
+			--dest-device /dev/sda \
+			--dest-console tty0 \
+			--dest-console ttyS0 \
+			--dest-karg-append selinux=0 \
+			--live-karg-append console=tty0 \
+			--live-karg-append console=ttyS0 \
+			cosa/builds/latest/x86_64/fedora-coreos-*-live.x86_64.iso && \
+		popd
